@@ -22,6 +22,11 @@ define('DEFAULT_VIEW', 'Dashboard1');
 define('SYSTEM_CLASS_PATH', 'MVC/CLASSES/system.class.php');
 define('ROOT_PATH', dirname(__FILE__));
 
+// Helper function for assets
+function asset($path) {
+    return '/assets/' . ltrim($path, '/');
+}
+
 // Iniciar sessão
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -78,14 +83,14 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
   <title>Divinosys 1.0</title>
 
   <!-- Bootstrap CSS -->
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="<?php echo asset('vendor/bootstrap/css/bootstrap.min.css'); ?>" rel="stylesheet">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Font Awesome -->
-  <link href="assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+  <link href="<?php echo asset('vendor/fontawesome-free/css/all.min.css'); ?>" rel="stylesheet">
   <!-- Custom Login CSS -->
-  <link href="assets/css/login-style.css" rel="stylesheet"/>
-  <link rel="shortcut icon" href="assets/img/beer.png">
+  <link href="<?php echo asset('css/login-style.css'); ?>" rel="stylesheet"/>
+  <link rel="shortcut icon" href="<?php echo asset('img/beer.png'); ?>">
 </head>
 
 <body>
@@ -136,8 +141,8 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
   </div>
 
   <!-- Scripts -->
-  <script src="assets/vendor/jquery/jquery.min.js"></script>
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="<?php echo asset('vendor/jquery/jquery.min.js'); ?>"></script>
+  <script src="<?php echo asset('vendor/bootstrap/js/bootstrap.bundle.min.js'); ?>"></script>
 </body>
 </html>
 

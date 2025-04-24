@@ -36,29 +36,40 @@ class Conexao {
                 $pass = getenv('DB_PASSWORD') ?: '122334Qw!!Conext';
 
                 // Log connection attempt
-                error_log("=== Attempting database connection ===");
+                error_log("=== Database Connection Debug ===");
                 error_log("Host: " . $host);
                 error_log("Database: " . $dbname);
                 error_log("User: " . $user);
+                error_log("Current Directory: " . __DIR__);
+                error_log("Document Root: " . $_SERVER['DOCUMENT_ROOT']);
+                error_log("Environment Variables:");
+                error_log("DB_HOST: " . getenv('DB_HOST'));
+                error_log("DB_DATABASE: " . getenv('DB_DATABASE'));
+                error_log("DB_USERNAME: " . getenv('DB_USERNAME'));
 
-                // Create PDO connection
+                // Test DNS resolution
+                $ip = gethostbyname($host);
+                error_log("Resolved IP for {$host}: " . $ip);
+                if ($ip === $host) {
+                    error_log("WARNING: Could not resolve hostname");
+                }
+
+                // Create PDO connection with extended timeout
+                $dsn = "mysql:host={$host};dbname={$dbname};connect_timeout=10";
                 self::$instance = new PDO(
-                    "mysql:host={$host};dbname={$dbname}",
+                    $dsn,
                     $user,
                     $pass,
-                    array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8")
+                    array(
+                        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
+                        PDO::ATTR_TIMEOUT => 10,
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+                    )
                 );
-
-                // Configure PDO
-                self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                self::$instance->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
-                
-                // Set timezone
-                self::$instance->exec("SET time_zone = '+00:00'");
                 
                 error_log("=== Database connection successful ===");
             } catch(PDOException $e) {
-                error_log("Connection Error: " . $e->getMessage());
+                error_log("Connection Error Details: " . $e->getMessage());
                 if (getenv('APP_DEBUG') == 'true') {
                     echo "Connection Error: " . $e->getMessage();
                 } else {
