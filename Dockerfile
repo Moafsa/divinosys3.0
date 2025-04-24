@@ -47,6 +47,10 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
+# Create required directories
+RUN mkdir -p /var/www/html/uploads \
+    && mkdir -p /var/www/html/logs
+
 # Copy application files
 COPY . /var/www/html/
 
@@ -62,4 +66,4 @@ RUN echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/uploads.ini \
 
 EXPOSE 80
 
-CMD ["apache2-foreground"] 
+CMD ["apache2-foreground"]
