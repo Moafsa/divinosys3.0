@@ -28,34 +28,24 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Incluir arquivos necessários
-require_once ROOT_PATH . "/MVC/MODEL/config.php";
 require_once ROOT_PATH . "/MVC/MODEL/conexao.php";
 
 try {
-    // Definir o charset para UTF-8
-    if (!mysqli_set_charset($conn, "utf8")) {
-        throw new Exception("Erro ao definir charset UTF-8");
-    }
-
+    // Obter conexão PDO
+    $pdo = Conexao::getConn();
+    
     // Consultar a cor do sistema usando prepared statement
-    $select_table = "SELECT cor FROM cor WHERE id = ?";
-    $stmt = mysqli_prepare($conn, $select_table);
+    $stmt = $pdo->prepare("SELECT cor FROM cor WHERE id = ?");
     
     if (!$stmt) {
-        throw new Exception("Erro ao preparar consulta: " . mysqli_error($conn));
+        throw new Exception("Erro ao preparar consulta");
     }
     
-    mysqli_stmt_bind_param($stmt, "i", $id);
-    $id = 1;
+    $stmt->execute([1]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $_SESSION['cor'] = $result ? $result['cor'] : 'danger';
     
-    if (!mysqli_stmt_execute($stmt)) {
-        throw new Exception("Erro ao executar consulta: " . mysqli_stmt_error($stmt));
-    }
-    
-    $result = mysqli_stmt_get_result($stmt);
-    $_SESSION['cor'] = ($row = mysqli_fetch_assoc($result)) ? $row['cor'] : 'danger';
-    
-    mysqli_stmt_close($stmt);
+    $stmt = null;
 
 } catch (Exception $e) {
     error_log("Erro no index.php: " . $e->getMessage());
@@ -70,7 +60,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     // Se não estiver logado e não for uma requisição de login, mostrar o formulário
     if (!$is_login_request) {
         $_SESSION['msg'] = "<div class='alert alert-danger'>Acesso não autorizado! Faça login primeiro.</div>";
-        header("Location: " . Config::getInstance()->url('index.php'));
+        header("Location: index.php");
         exit;
     }
 ?>
@@ -88,14 +78,14 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
   <title>Divinosys 1.0</title>
 
   <!-- Bootstrap CSS -->
-  <link href="<?php echo assets('vendor/bootstrap/css/bootstrap.min.css'); ?>" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Font Awesome -->
-  <link href="<?php echo assets('vendor/fontawesome-free/css/all.min.css'); ?>" rel="stylesheet">
+  <link href="assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
   <!-- Custom Login CSS -->
-  <link href="<?php echo assets('css/login-style.css'); ?>" rel="stylesheet"/>
-  <link rel="shortcut icon" href="<?php echo assets('img/beer.png'); ?>">
+  <link href="assets/css/login-style.css" rel="stylesheet"/>
+  <link rel="shortcut icon" href="assets/img/beer.png">
 </head>
 
 <body>
@@ -106,7 +96,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
         <p>Sistema de Gestão de Pedidos</p>
       </div>
       
-      <form method="POST" action="<?php echo url('MVC/MODEL/login.php'); ?>">
+      <form method="POST" action="MVC/MODEL/login.php">
         <div class="form-group">
           <label for="login">Login</label>
           <div class="input-icon">
@@ -138,16 +128,16 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
       </form>
 
       <div class="login-links">
-        <a href="<?php echo url('recuperar_senha.php'); ?>">Esqueceu a senha?</a>
+        <a href="recuperar_senha.php">Esqueceu a senha?</a>
         <br>
-        <a href="<?php echo url('cadastrar_administrador.php'); ?>">Cadastrar Administrador</a>
+        <a href="cadastrar_administrador.php">Cadastrar Administrador</a>
       </div>
     </div>
   </div>
 
   <!-- Scripts -->
-  <script src="<?php echo assets('vendor/jquery/jquery.min.js'); ?>"></script>
-  <script src="<?php echo assets('vendor/bootstrap/js/bootstrap.bundle.min.js'); ?>"></script>
+  <script src="assets/vendor/jquery/jquery.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 
@@ -175,7 +165,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
         
     } catch (Exception $e) {
         error_log("Erro ao carregar sistema: " . $e->getMessage());
-        header("Location: " . url('error.php?msg=' . urlencode($e->getMessage())));
+        header("Location: error.php?msg=" . urlencode($e->getMessage()));
         exit;
     }
 }
