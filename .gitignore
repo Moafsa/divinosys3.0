@@ -1,0 +1,31 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+php_errors.log
+error.log
+cadastro_admin.log
+
+# Docker
+docker-compose.override.yml
+
+# Uploads directory
+uploads/*
+!uploads/.gitkeep
+
+# Dependencies
+vendor/
+node_modules/
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db 

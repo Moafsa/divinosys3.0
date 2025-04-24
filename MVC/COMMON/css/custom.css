@@ -1,0 +1,51 @@
+/* Fix for sidebar spacing */
+.sidebar {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+/* Stock page styles */
+.stock-card {
+    border-left: 4px solid #e74a3b;
+    transition: all 0.3s ease;
+}
+
+.stock-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stock-title {
+    color: #e74a3b;
+    font-weight: 600;
+}
+
+.stock-info {
+    font-size: 0.95rem;
+}
+
+.stock-current {
+    color: #e74a3b;
+    font-weight: bold;
+}
+
+.stock-min {
+    color: #858796;
+}
+
+/* Content wrapper fix */
+#content-wrapper {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+    .sidebar {
+        margin-left: 0 !important;
+    }
+    
+    #content-wrapper {
+        margin-left: 0 !important;
+    }
+} 

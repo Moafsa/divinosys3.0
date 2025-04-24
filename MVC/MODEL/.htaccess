@@ -1,0 +1,16 @@
+# Allow direct access to PHP files in this directory
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+</IfModule>
+
+# Set JSON content type for specific files
+<FilesMatch "buscar_ingredientes_produto\.php$">
+    Header set Content-Type "application/json"
+</FilesMatch>
+
+# Enable CORS
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+Header set Access-Control-Allow-Headers "Content-Type, Accept" 

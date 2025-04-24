@@ -1,0 +1,1390 @@
+<?php
+// Prevenir qualquer saída antes dos headers
+if (ob_get_level()) ob_end_clean();
+ob_start();
+
+// Garantir que a sessão está iniciada
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Incluir arquivos necessários
+require_once(__DIR__ . "/include_conexao.php");
+require_once(__DIR__ . "/../MODEL/config.php");
+$config = Config::getInstance();
+
+// Inicializar variáveis
+$total = 0;
+$todos_pedidos = [];
+$error_message = '';
+$categorias_data = [];
+
+// Obter parâmetros da URL
+$mesa = isset($_GET['mesa']) ? intval($_GET['mesa']) : null;
+$cliente = isset($_GET['cliente']) ? htmlspecialchars($_GET['cliente']) : '';
+
+try {
+    // Verificar conexão
+    if (!isset($conn) || !$conn) {
+        throw new Exception("Conexão com o banco não está disponível");
+    }
+
+    // Buscar categorias
+    $stmt = mysqli_prepare($conn, "
+        SELECT id, nome 
+        FROM categorias 
+        ORDER BY 
+            CASE nome 
+                WHEN 'XIS' THEN 1
+                WHEN 'Cachorro-Quente' THEN 2
+                WHEN 'Bauru' THEN 3
+                WHEN 'PF e A La Minuta' THEN 4
+                WHEN 'Torrada' THEN 5
+                WHEN 'Rodízio' THEN 6
+                WHEN 'Porções' THEN 7
+                WHEN 'Bebidas' THEN 8
+                WHEN 'Bebidas Alcoólicas' THEN 9
+                ELSE 10
+            END
+    ");
+    
+    if (!$stmt) {
+        throw new Exception("Erro ao preparar consulta: " . mysqli_error($conn));
+    }
+    
+    if (!mysqli_stmt_execute($stmt)) {
+        throw new Exception("Erro ao executar consulta: " . mysqli_stmt_error($stmt));
+    }
+    
+    $categorias = mysqli_stmt_get_result($stmt);
+    if (!$categorias) {
+        throw new Exception("Erro ao obter resultados: " . mysqli_error($conn));
+    }
+
+    while ($categoria = mysqli_fetch_assoc($categorias)) {
+        $categorias_data[] = $categoria;
+    }
+    
+    // Buscar pedidos da mesa se houver
+    if ($mesa) {
+        $stmt = mysqli_prepare($conn, "
+            SELECT 
+                p.*,
+                pr.nome as produto_nome,
+                pr.descricao,
+                pr.preco_normal as preco_venda,
+                p.valor as valor_total
+            FROM pedido p 
+            LEFT JOIN produtos pr ON pr.nome = p.produto
+            WHERE p.idmesa = ? AND p.status != 'Finalizado'
+            ORDER BY p.data DESC, p.hora_pedido DESC
+        ");
+        
+        if (!$stmt) {
+            throw new Exception("Erro ao preparar consulta de pedidos: " . mysqli_error($conn));
+        }
+        
+        mysqli_stmt_bind_param($stmt, 'i', $mesa);
+        
+        if (!mysqli_stmt_execute($stmt)) {
+            throw new Exception("Erro ao executar consulta de pedidos: " . mysqli_stmt_error($stmt));
+        }
+        
+        $pedidos = mysqli_stmt_get_result($stmt);
+        if (!$pedidos) {
+            throw new Exception("Erro ao obter resultados dos pedidos: " . mysqli_error($conn));
+        }
+        
+        while ($pedido = mysqli_fetch_assoc($pedidos)) {
+            $total += floatval(str_replace(',', '.', $pedido['valor']));
+            $todos_pedidos[] = $pedido;
+        }
+    }
+} catch (Exception $e) {
+    error_log("Erro em gerar_pedido.php: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
+    $error_message = "Erro ao carregar dados: " . htmlspecialchars($e->getMessage());
+}
+
+// Função para formatar valor monetário
+function formatMoney($value) {
+    return 'R$ ' . number_format($value, 2, ',', '.');
+}
+
+// Função para limpar o carrinho da mesa
+function limparCarrinho($mesa_id) {
+    if (isset($_SESSION['carrinho'][$mesa_id])) {
+        unset($_SESSION['carrinho'][$mesa_id]);
+    }
+}
+
+// Inicializar o carrinho se não existir
+if ($mesa && !isset($_SESSION['carrinho'][$mesa])) {
+    $_SESSION['carrinho'][$mesa] = array();
+}
+
+// Calcular total do carrinho
+$total_carrinho = 0;
+if ($mesa && isset($_SESSION['carrinho'][$mesa])) {
+    foreach ($_SESSION['carrinho'][$mesa] as $index => $item) {
+        $total_carrinho += isset($item['valor_total']) ? $item['valor_total'] : 0;
+    }
+}
+
+// Agora que todo o processamento PHP foi concluído, podemos começar a saída HTML
+?>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Sistema de PDV para restaurantes">
+    <meta name="author" content="Divino Lanches">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>e-Comandas</title>
+
+    <!-- Estilos -->
+    <link href="<?php echo $config->url('Pdv/mvc/common/css/animate.min.css'); ?>" rel="stylesheet"><!--ESTE COMANDO CRIA A NOTIFICAÇÃO ANIMADA -->
+    <link href="<?php echo $config->url('Pdv/mvc/common/css/bootstrap-datepicker.css'); ?>" rel="stylesheet">
+    <link rel="shortcut icon" href="<?php echo $config->url('Pdv/mvc/common/img/beer.png'); ?>"><!--este comando muda o icone da janela-->
+    <!-- Custom fonts for this template-->
+    <link href="<?php echo $config->url('Pdv/mvc/common/vendor/fontawesome-free/css/all.min.css'); ?>" rel="stylesheet" type="text/css">
+
+    <!-- Estilos específicos da página -->
+    <style>
+        :root {
+            --primary-color: #ea1d2c;
+            --secondary-color: #f7f7f7;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-bottom: 80px;
+        }
+
+        .category-menu {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            justify-items: center;
+        }
+
+        .category-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .category-image {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e8e8e8;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .category-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            margin-top: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .category-item:hover .category-image {
+            transform: scale(1.1);
+            border-color: var(--primary-color);
+        }
+
+        .category-item.active .category-image {
+            border-color: var(--primary-color);
+            border-width: 3px;
+        }
+
+        .category-item:hover .category-name,
+        .category-item.active .category-name {
+            color: var(--primary-color);
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.2s;
+            cursor: pointer;
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-price {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .cart-container {
+            background-color: #000 !important;
+            color: white !important;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .cart-item {
+            border-bottom: 1px solid #333;
+            padding: 10px 0;
+        }
+
+        .cart-container .text-muted {
+            color: #aaa !important;
+        }
+
+        .cart-container h5,
+        .cart-container h6,
+        .cart-container .cart-badge {
+            color: white !important;
+        }
+
+        .cart-container .btn-link {
+            color: #fff !important;
+        }
+
+        .cart-container .product-price {
+            color: var(--primary-color) !important;
+        }
+
+        .search-container {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: var(--secondary-color);
+            padding: 15px 0;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #c41824;
+            border-color: #c41824;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .sticky-cart {
+            position: sticky;
+            top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 200px;
+            }
+
+            .sticky-cart {
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                top: auto !important;
+                z-index: 1000 !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+            }
+
+            .cart-container {
+                margin-bottom: 0 !important;
+            }
+        }
+
+        #loadingIndicator {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #loadingIndicator.show {
+            display: flex !important;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
+        
+        .select2-selection__choice {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            border: none !important;
+            padding: 2px 8px !important;
+        }
+        
+        .select2-selection__choice__remove {
+            color: white !important;
+            margin-right: 5px !important;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Conteúdo específico da página -->
+<div id="loadingIndicator">
+    <div class="spinner"></div>
+</div>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Categorias e Produtos (Lado Esquerdo) -->
+        <div class="col-md-8">
+            <!-- Barra de Pesquisa -->
+            <div class="search-container mb-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0" id="searchProduto" 
+                           placeholder="Buscar produtos...">
+                </div>
+            </div>
+
+            <!-- Menu de Categorias -->
+            <div class="category-menu">
+                <?php 
+                // Buscar categorias com suas imagens
+                $query = "SELECT id, nome, imagem FROM categorias ORDER BY nome";
+                $categorias = mysqli_query($conn, $query);
+                
+                while ($categoria = mysqli_fetch_assoc($categorias)): 
+                    $imagem = $categoria['imagem'] ? $categoria['imagem'] : 'MVC/COMMON/img/no-image.jpg';
+                ?>
+                    <div class="category-item" data-categoria="<?php echo htmlspecialchars($categoria['nome']); ?>">
+                        <img src="<?php echo $imagem; ?>" 
+                             alt="<?php echo htmlspecialchars($categoria['nome']); ?>" 
+                             class="category-image"
+                             onerror="this.src='MVC/COMMON/img/no-image.jpg'">
+                        <span class="category-name"><?php echo htmlspecialchars($categoria['nome']); ?></span>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+
+            <!-- Lista de Produtos -->
+            <div class="row" id="listaProdutos">
+                <!-- Produtos serão carregados aqui via AJAX -->
+            </div>
+        </div>
+
+        <!-- Carrinho (Lado Direito) -->
+        <div class="col-md-4">
+            <div class="cart-container sticky-cart">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-cart"></i> 
+                        Carrinho
+                        <?php if ($mesa): ?>
+                            <small class="text-muted">- Mesa <?php echo $mesa; ?></small>
+                        <?php endif; ?>
+                    </h5>
+                    <span class="cart-badge" id="cartCount">0</span>
+                </div>
+
+                <div id="cartItems">
+                    <?php if ($mesa && isset($_SESSION['carrinho'][$mesa]) && !empty($_SESSION['carrinho'][$mesa])): ?>
+                        <?php foreach ($_SESSION['carrinho'][$mesa] as $index => $item): ?>
+                            <div class="cart-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="mb-0"><?php echo htmlspecialchars($item['nome'] ?? 'Produto não especificado'); ?></h6>
+                                        <small class="text-muted">
+                                            <?php echo htmlspecialchars($item['quantidade'] ?? 0); ?>x 
+                                            R$ <?php echo formatMoney($item['preco_unitario'] ?? 0); ?>
+                                            <?php if (isset($item['tamanho']) && $item['tamanho'] !== 'normal'): ?>
+                                                (<?php echo htmlspecialchars($item['tamanho']); ?>)
+                                            <?php endif; ?>
+                                        </small>
+                                        
+                                        <?php if (!empty($item['ingredientes'])): ?>
+                                            <?php 
+                                            $ingredientes_removidos = array_filter($item['ingredientes'], function($ing) {
+                                                return $ing['padrao'] && !$ing['incluido'];
+                                            });
+                                            $ingredientes_adicionados = array_filter($item['ingredientes'], function($ing) {
+                                                return !$ing['padrao'] && $ing['incluido'];
+                                            });
+                                            ?>
+                                            
+                                            <?php if (!empty($ingredientes_removidos)): ?>
+                                                <br><small class="text-danger">
+                                                    Sem: <?php echo htmlspecialchars(implode(', ', array_map(function($ing) { 
+                                                        return $ing['nome']; 
+                                                    }, $ingredientes_removidos))); ?>
+                                                </small>
+                                            <?php endif; ?>
+                                            
+                                            <?php if (!empty($ingredientes_adicionados)): ?>
+                                                <br><small class="text-success">
+                                                    Com: <?php echo htmlspecialchars(implode(', ', array_map(function($ing) { 
+                                                        return $ing['nome']; 
+                                                    }, $ingredientes_adicionados))); ?>
+                                                </small>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                        
+                                        <?php if (!empty($item['observacao'])): ?>
+                                            <br><small class="text-muted">
+                                                Obs: <?php echo htmlspecialchars($item['observacao']); ?>
+                                            </small>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="product-price mb-2">
+                                            R$ <?php echo formatMoney($item['valor_total'] ?? 0); ?>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="removerItem(<?php echo $index; ?>)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                        
+                        <div class="cart-total mt-3">
+                            <strong>Total:</strong> R$ <?php echo formatMoney($total_carrinho); ?>
+                    </div>
+                        
+                        <button class="btn btn-primary btn-block w-100 mt-3 finalizar-pedido">
+                        Finalizar Pedido
+                    </button>
+                    <?php else: ?>
+                        <p class="text-center text-muted">Carrinho vazio</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Produto -->
+<div class="modal fade" id="modalProduto" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalProdutoNome"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted" id="modalProdutoDesc"></p>
+                
+                <!-- Ingredientes -->
+                <div id="ingredientesContainer" class="mb-3">
+                    <label class="form-label">Selecione os Ingredientes</label>
+                    <select id="ingredientesSelect" class="form-select" multiple>
+                        <!-- Ingredientes serão carregados aqui -->
+                    </select>
+                    <small class="text-muted">
+                        Digite para buscar ingredientes. Selecione para incluir, desselecione para remover.
+                    </small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tamanho</label>
+                    <select class="form-select" id="modalTamanho">
+                        <option value="normal">Normal</option>
+                        <option value="mini">Mini</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Quantidade</label>
+                    <div class="input-group">
+                        <button class="btn btn-outline-secondary" type="button" onclick="alterarQuantidade(-1)">-</button>
+                        <input type="number" class="form-control text-center" id="modalQuantidade" value="1" min="1">
+                        <button class="btn btn-outline-secondary" type="button" onclick="alterarQuantidade(1)">+</button>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Observações</label>
+                    <textarea class="form-control" id="modalObservacoes" rows="2" 
+                              placeholder="Ex: Sem cebola, bem passado..."></textarea>
+                </div>
+
+                <div class="text-end">
+                    <h4 class="product-price">Total: R$ <span id="modalTotal">0,00</span></h4>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="adicionarAoCarrinho()">
+                    Adicionar ao Carrinho
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts específicos da página -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+let produtoSelecionado = null;
+const modalProduto = new bootstrap.Modal(document.getElementById('modalProduto'));
+
+// Adicionar função de teste no início do arquivo
+function testarAPI() {
+    console.log('Testando API...');
+    $.ajax({
+        url: 'MVC/MODEL/teste_api.php',
+        method: 'GET',
+        success: function(response) {
+            console.log('Resposta do teste:', response);
+            alert('API respondeu com sucesso! Verifique o console para mais detalhes.');
+        },
+        error: function(xhr, status, error) {
+            console.error('Erro no teste:', {
+                status: status,
+                error: error,
+                responseText: xhr.responseText
+            });
+            alert('Erro ao testar API! Verifique o console para mais detalhes.');
+        }
+    });
+}
+
+// Função para buscar produtos
+function buscarProdutos(termo = '') {
+    console.log('Iniciando busca de produtos com termo:', termo);
+    
+    $.ajax({
+        url: '<?php echo $config->url("Pdv/MVC/MODEL/buscar_produtos.php"); ?>',
+        method: 'GET',
+        data: { termo: termo },
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        beforeSend: function() {
+            console.log('Enviando requisição para:', this.url);
+            mostrarCarregando();
+            $('#listaProdutos').html('<div class="text-center">Carregando produtos...</div>');
+        },
+        success: function(response) {
+            console.log('Resposta recebida:', response);
+            esconderCarregando();
+            
+            if (!response || !response.success) {
+                console.error('Resposta inválida:', response);
+                $('#listaProdutos').html('<div class="alert alert-danger">Erro ao carregar produtos: ' + 
+                    (response.message || 'Resposta inválida do servidor') + '</div>');
+                return;
+            }
+            
+            const produtos = response.data;
+            let html = '<div class="row">';
+            
+            if (!produtos || produtos.length === 0) {
+                html = '<div class="alert alert-info">Nenhum produto encontrado</div>';
+            } else {
+                produtos.forEach(function(produto) {
+                    const precoNormal = parseFloat(produto.preco_normal).toFixed(2);
+                    const precoMini = produto.preco_mini ? parseFloat(produto.preco_mini).toFixed(2) : null;
+                    
+                    html += `
+                        <div class="col-md-4 mb-3">
+                            <div class="product-card">
+                                    <div class="product-info">
+                                    <h5 class="product-title">${produto.nome}</h5>
+                                    <p class="product-description text-muted">${produto.descricao || ''}</p>
+                                    <div class="product-price">
+                                        <strong>Normal:</strong> R$ ${precoNormal}<br>
+                                        ${precoMini ? `<strong>Mini:</strong> R$ ${precoMini}<br>` : ''}
+                                        <strong>Categoria:</strong> ${produto.categoria_nome || 'N/A'}<br>
+                                        <strong>Código:</strong> ${produto.codigo_produto || 'N/A'}
+                                    </div>
+                                    <div class="product-actions mt-2">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="abrirModalProduto(${JSON.stringify(produto)})">
+                                            <i class="fas fa-edit"></i> Personalizar
+                                        </button>
+                                        <button class="btn btn-sm btn-success" onclick="adicionarRapido(event, ${JSON.stringify(produto)})">
+                                            <i class="fas fa-plus"></i> Adicionar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>`;
+                });
+                html += '</div>';
+            }
+            
+            $('#listaProdutos').html(html);
+        },
+        error: function(xhr, status, error) {
+            console.error('Erro ao buscar produtos:', {
+                status: status,
+                error: error,
+                responseText: xhr.responseText,
+                xhr: xhr
+            });
+            esconderCarregando();
+            $('#listaProdutos').html('<div class="alert alert-danger">Erro ao carregar produtos: ' + error + '</div>');
+        }
+    });
+}
+
+// Função auxiliar para validar produto
+function validarProduto(produto) {
+    return produto && 
+           produto.id && 
+           produto.nome && 
+           (produto.preco_normal || produto.preco_normal === 0);
+}
+
+// Função auxiliar para escapar HTML e prevenir XSS
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// Função para formatar preço em BRL
+function formatarPreco(valor) {
+    if (valor === null || valor === undefined) return 'Preço não disponível';
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(valor);
+}
+
+function abrirModalProduto(produtoJSON) {
+    try {
+        const produto = typeof produtoJSON === 'string' ? 
+            JSON.parse(decodeURIComponent(produtoJSON)) : produtoJSON;
+            
+        console.log('Produto selecionado:', produto);
+        produtoSelecionado = produto;
+        
+        // Validar se o produto tem todos os dados necessários
+        if (!produto || !produto.id || !produto.nome) {
+            console.error('Produto inválido:', produto);
+            mostrarErro('Erro: Dados do produto inválidos ou incompletos');
+            return;
+        }
+        
+        $('#modalProdutoNome').text(produto.nome);
+        $('#modalProdutoDesc').text(produto.descricao || '');
+        $('#modalQuantidade').val(1);
+        $('#modalTamanho').val('normal');
+        $('#modalObservacoes').val('');
+        
+        // Atualizar o total inicial
+        atualizarTotalModal();
+
+        // Verificar se o produto pode ter ingredientes
+        $.ajax({
+            url: '<?php echo $config->url("Pdv/MVC/MODEL/buscar_ingredientes.php"); ?>',
+            method: 'GET',
+            data: { produto_id: produto.id },
+            beforeSend: function() {
+                mostrarCarregando();
+                $('#ingredientesContainer').hide();
+            },
+            success: function(response) {
+                if (response.success && response.data && response.data.length > 0) {
+                    $('#ingredientesContainer').show();
+                    const $select = $('#ingredientesSelect');
+                    
+                    // Limpar select
+                    $select.empty();
+                    
+                    // Adicionar opções
+                    response.data.forEach(ing => {
+                        const option = new Option(ing.nome, ing.id, true, ing.padrao);
+                        $select.append(option);
+                    });
+                    
+                    // Atualizar Select2
+                    $select.trigger('change');
+                } else {
+                    $('#ingredientesContainer').hide();
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#ingredientesContainer').hide();
+                console.error('Erro ao carregar ingredientes:', {
+                    status: status,
+                    error: error,
+                    responseText: xhr.responseText
+                });
+                mostrarErro('Erro ao carregar ingredientes do produto');
+            },
+            complete: function() {
+                esconderCarregando();
+            }
+        });
+
+        // Abrir o modal
+        $('#modalProduto').modal('show');
+    } catch (error) {
+        console.error('Erro ao processar produto:', error);
+        mostrarErro('Erro ao processar dados do produto');
+    }
+}
+
+function adicionarRapido(event, produtoJSON) {
+    event.preventDefault(); 
+    event.stopPropagation();
+    
+    try {
+        const produto = typeof produtoJSON === 'string' ? 
+            JSON.parse(decodeURIComponent(produtoJSON)) : produtoJSON;
+            
+        console.log('Adicionando produto:', produto);
+        
+        if (!produto || !produto.id) {
+            console.error('Produto inválido:', produto);
+            mostrarErro('Erro: Produto inválido');
+            return;
+        }
+
+        const mesa_id = <?php echo $mesa ?: 'null'; ?>;
+        if (!mesa_id) {
+            console.error('Mesa não selecionada');
+            mostrarErro('Erro: Mesa não selecionada');
+            return;
+        }
+
+        mostrarCarregando();
+        
+        // Buscar ingredientes padrão do produto
+        $.ajax({
+            url: '<?php echo $config->url("Pdv/MVC/MODEL/buscar_ingredientes_produto.php"); ?>',
+            method: 'GET',
+            data: { produto_id: produto.id },
+            beforeSend: function() {
+                mostrarCarregando();
+            },
+            success: function(response) {
+                if (response.success && response.data) {
+                    // Pegar IDs de todos os ingredientes padrão
+                    const ingredientesPadrao = response.data
+                        .filter(ing => ing.padrao)
+                        .map(ing => ing.id.toString());
+                    
+                    enviarPedidoRapido(produto, mesa_id, ingredientesPadrao);
+                } else {
+                    enviarPedidoRapido(produto, mesa_id, []);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Erro ao carregar ingredientes:', {
+                    status: status,
+                    error: error,
+                    responseText: xhr.responseText
+                });
+                enviarPedidoRapido(produto, mesa_id, []);
+            },
+            complete: function() {
+                esconderCarregando();
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao processar produto:', error);
+        mostrarErro('Erro ao processar dados do produto');
+        esconderCarregando();
+    }
+}
+
+function carregarIngredientes(produto_id) {
+    $.ajax({
+        url: '<?php echo $config->url("Pdv/MVC/MODEL/buscar_ingredientes.php"); ?>',
+        method: 'GET',
+        data: { produto_id: produto_id },
+        success: function(response) {
+            if (response.success) {
+                const ingredientes = response.data;
+                const $select = $('#ingredientesSelect');
+                
+                // Limpar select
+                $select.empty();
+                
+                // Adicionar opções
+                ingredientes.forEach(ing => {
+                    const option = new Option(ing.nome, ing.id, true, ing.padrao);
+                    $select.append(option);
+                });
+                
+                // Atualizar Select2
+                $select.trigger('change');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Erro ao carregar ingredientes:', {
+                status: status,
+                error: error,
+                responseText: xhr.responseText
+            });
+            mostrarErro('Erro ao carregar ingredientes do produto');
+        }
+    });
+}
+
+// Funções auxiliares
+function alterarQuantidade(delta) {
+    const input = $('#modalQuantidade');
+    const novoValor = Math.max(1, parseInt(input.val()) + delta);
+    input.val(novoValor);
+    atualizarTotalModal();
+}
+
+function atualizarTotalModal() {
+    if (!produtoSelecionado) return;
+    
+    const quantidade = parseInt($('#modalQuantidade').val()) || 1;
+    const tamanho = $('#modalTamanho').val();
+    let preco = parseFloat(produtoSelecionado.preco_normal) || 0;
+    
+    // Se for tamanho mini, aplicar desconto de 30%
+    if (tamanho === 'mini') {
+        preco = preco * 0.7;
+    }
+    
+    const total = quantidade * preco;
+    console.log('Calculando total:', {
+        quantidade: quantidade,
+        tamanho: tamanho,
+        preco_base: produtoSelecionado.preco_normal,
+        preco_calculado: preco,
+        total: total,
+        produtoSelecionado: produtoSelecionado
+    });
+    
+    $('#modalTotal').text(formatarPreco(total));
+}
+
+// Função para adicionar ao carrinho após personalização
+function adicionarAoCarrinho() {
+    if (!produtoSelecionado || !produtoSelecionado.id) {
+        console.error('Produto inválido:', produtoSelecionado);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Produto inválido ou não selecionado'
+        });
+        return;
+    }
+
+    const mesa_id = <?php echo $mesa ?: 'null'; ?>;
+    if (!mesa_id) {
+        console.error('Mesa não selecionada');
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Por favor, selecione uma mesa'
+        });
+        return;
+    }
+
+    const quantidade = parseInt($('#modalQuantidade').val());
+    if (isNaN(quantidade) || quantidade <= 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Por favor, informe uma quantidade válida'
+        });
+        return;
+    }
+
+    const tamanho = $('#modalTamanho').val();
+    const observacoes = $('#modalObservacoes').val()?.trim() ?? '';
+    const ingredientesSelecionados = $('#ingredientesSelect').val() || [];
+
+    const dados = {
+        produto_id: produtoSelecionado.id,
+        mesa_id: mesa_id,
+        quantidade: quantidade,
+        tamanho: tamanho,
+        observacoes: observacoes,
+        ingredientes: ingredientesSelecionados
+    };
+
+    console.log('Enviando dados para o carrinho:', dados);
+    mostrarCarregando();
+
+    $.ajax({
+        url: '<?php echo $config->url("Pdv/MVC/MODEL/carrinho.php"); ?>',
+        method: 'POST',
+        data: JSON.stringify(dados),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            console.log('Resposta do servidor:', response);
+            if (response.success) {
+                $('#modalProduto').modal('hide');
+                atualizarCarrinhoUI(response.carrinho);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: 'Item adicionado ao carrinho',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: response.message || 'Erro ao adicionar item ao carrinho'
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Erro ao adicionar item:', {
+                status: status,
+                error: error,
+                responseText: xhr.responseText
+            });
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Erro ao adicionar item ao carrinho. Por favor, tente novamente.'
+            });
+        },
+        complete: function() {
+            esconderCarregando();
+        }
+    });
+}
+
+function atualizarCarrinhoUI(itens) {
+    if (!Array.isArray(itens)) {
+        console.error('Dados do carrinho inválidos:', itens);
+        return;
+    }
+
+                let html = '';
+                let total = 0;
+                
+    itens.forEach((item, index) => {
+        if (!item) return;
+
+        const valorTotal = parseFloat(item.valor_total) || 0;
+        total += valorTotal;
+
+        // Preparar strings de ingredientes modificados
+        let ingredientesHtml = '';
+        if (Array.isArray(item.ingredientes)) {
+                        const removidos = item.ingredientes
+                .filter(ing => ing && ing.padrao && !ing.incluido)
+                            .map(ing => ing.nome);
+                        
+                        const adicionados = item.ingredientes
+                .filter(ing => ing && !ing.padrao && ing.incluido)
+                            .map(ing => ing.nome);
+                        
+                        if (removidos.length > 0) {
+                ingredientesHtml += `<br><small class="text-danger">Sem: ${removidos.join(', ')}</small>`;
+                        }
+                        if (adicionados.length > 0) {
+                ingredientesHtml += `<br><small class="text-success">Com: ${adicionados.join(', ')}</small>`;
+                        }
+                    }
+                    
+                    html += `
+                        <div class="cart-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="mb-0">${item.nome}</h6>
+                                    <small class="text-muted">
+                            ${item.quantidade}x R$ ${formatMoney(item.preco_unitario)}
+                            ${item.tamanho ? ` (${item.tamanho})` : ''}
+                                    </small>
+                        ${ingredientesHtml}
+                        ${item.observacao ? `<br><small class="text-muted">Obs: ${item.observacao}</small>` : ''}
+                                </div>
+                                <div class="text-end">
+                        <div class="product-price mb-2">
+                            R$ ${formatMoney(item.valor_total)}
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removerItem(${index})">
+                            <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+    $('#cartItems').html(html);
+    $('#cartCount').text(itens.length);
+    $('#cartTotal').text(formatMoney(total));
+}
+
+function enviarPedidoRapido(produto, mesa_id, ingredientes) {
+    if (!produto || !produto.id || !mesa_id) {
+        console.error('Dados inválidos:', { produto, mesa_id });
+        mostrarErro('Dados inválidos para adicionar produto');
+        return;
+    }
+
+    const dados = {
+        produto_id: produto.id,
+        mesa_id: mesa_id,
+        quantidade: 1,
+        tamanho: 'normal',
+        observacoes: '',
+        ingredientes: ingredientes
+    };
+
+    console.log('Enviando pedido rápido:', dados);
+
+    $.ajax({
+        url: '<?php echo $config->url("Pdv/MVC/MODEL/carrinho.php"); ?>',
+        method: 'POST',
+        data: JSON.stringify(dados),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            console.log('Resposta do servidor:', response);
+            if (response.success) {
+                atualizarCarrinhoUI(response.carrinho);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: 'Item adicionado ao carrinho',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                mostrarErro(response.message || 'Erro ao adicionar item ao carrinho');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Erro ao adicionar item:', {
+                status: status,
+                error: error,
+                responseText: xhr.responseText
+            });
+            mostrarErro('Erro ao adicionar item ao carrinho');
+        },
+        complete: function() {
+            esconderCarregando();
+        }
+    });
+}
+
+// Funções de feedback visual
+function mostrarCarregando() {
+    $('#loadingIndicator').addClass('show');
+}
+
+function esconderCarregando() {
+    $('#loadingIndicator').removeClass('show');
+}
+
+function mostrarErro(mensagem) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Erro',
+        text: mensagem
+    });
+}
+
+// Função para remover item do carrinho
+function removerItem(index) {
+    const mesa_id = <?php echo $mesa ?: 'null'; ?>;
+    if (!mesa_id) {
+        mostrarErro('Mesa não selecionada');
+        return;
+    }
+
+    Swal.fire({
+        title: 'Confirmar remoção',
+        text: 'Deseja remover este item do carrinho?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, remover',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            mostrarCarregando();
+            
+            $.ajax({
+                url: '<?php echo $config->url("Pdv/MVC/MODEL/carrinho.php"); ?>',
+                method: 'DELETE',
+                data: JSON.stringify({
+                    mesa_id: mesa_id,
+                    index: index
+                }),
+                contentType: 'application/json',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        atualizarCarrinhoUI(response.carrinho);
+    Swal.fire({
+        icon: 'success',
+        title: 'Sucesso!',
+                            text: 'Item removido do carrinho',
+                            timer: 1500,
+        showConfirmButton: false
+                        });
+                    } else {
+                        mostrarErro(response.message || 'Erro ao remover item do carrinho');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro ao remover item:', {
+                        status: status,
+                        error: error,
+                        responseText: xhr.responseText
+                    });
+                    mostrarErro('Erro ao remover item do carrinho');
+                },
+                complete: function() {
+                    esconderCarregando();
+                }
+            });
+        }
+    });
+}
+
+$(document).ready(function() {
+    // Inicializar Select2 para ingredientes
+    $('#ingredientesSelect').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Selecione os ingredientes'
+    });
+
+    // Event listener para clique nas categorias
+    $('.category-item').on('click', function() {
+        const categoria = $(this).data('categoria');
+        console.log('Categoria selecionada:', categoria);
+        
+        // Remover classe active de todas as categorias
+        $('.category-item').removeClass('active');
+        // Adicionar classe active na categoria selecionada
+        $(this).addClass('active');
+        
+        // Buscar produtos da categoria
+        buscarProdutos();
+    });
+
+    // Carregar todos os produtos ao iniciar
+    buscarProdutos();
+    
+    // Busca em tempo real quando digitar
+    let timeoutBusca;
+    $('#searchProduto').on('input', function() {
+        clearTimeout(timeoutBusca);
+        const termo = $(this).val().trim();
+        
+        timeoutBusca = setTimeout(() => {
+            buscarProdutos(termo);
+        }, 300); // Aguarda 300ms após parar de digitar
+    });
+
+    // Event listeners para quantidade no modal
+    $('#modalQuantidade').on('change', function() {
+        const valor = parseInt($(this).val());
+        if (isNaN(valor) || valor < 1) {
+            $(this).val(1);
+        }
+        atualizarTotalModal();
+    });
+
+    $('#modalTamanho').on('change', function() {
+        atualizarTotalModal();
+    });
+
+    // Event listener para finalizar pedido
+    $('.finalizar-pedido').on('click', function() {
+        // Verificar se há itens no carrinho
+        if (!mesa_id) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Erro',
+                text: 'Mesa não selecionada'
+            });
+            return;
+        }
+
+        const itensCarrinho = $('#cartItems .cart-item');
+        if (itensCarrinho.length === 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Carrinho vazio',
+                text: 'Adicione itens ao carrinho antes de finalizar o pedido.'
+            });
+            return;
+        }
+
+        // Coletar itens do carrinho
+        const itens = [];
+        itensCarrinho.each(function() {
+            const $item = $(this);
+            const nome = $item.find('h6').text().trim();
+            const quantidade = parseInt($item.find('small').text().match(/(\d+)x/)[1]);
+            const precoUnitario = parseFloat($item.find('small').text().match(/R\$ ([\d,]+)/)[1].replace(',', '.'));
+            const valorTotal = parseFloat($item.find('.product-price').text().replace('R$', '').replace(',', '.').trim());
+            const observacao = $item.find('small.text-muted:contains("Obs:")').text().replace('Obs:', '').trim();
+
+            itens.push({
+                nome: nome,
+                quantidade: quantidade,
+                preco_unitario: precoUnitario,
+                valor_total: valorTotal,
+                observacao: observacao
+            });
+        });
+
+        // Confirmar finalização
+        Swal.fire({
+            title: 'Confirmar pedido?',
+            text: `Total de itens: ${itens.length}`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sim, finalizar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Mostrar loading
+                Swal.fire({
+                    title: 'Processando...',
+                    text: 'Finalizando seu pedido',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Preparar dados do pedido
+                const dadosPedido = {
+                    mesa_id: mesa_id,
+                    itens: itens
+                };
+
+                console.log('Enviando pedido:', dadosPedido);
+
+                // Enviar requisição
+                $.ajax({
+                    url: '<?php echo $config->url("Pdv/MVC/MODEL/finalizar_pedido.php"); ?>',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dadosPedido),
+                    success: function(response) {
+                        console.log('Resposta do servidor:', response);
+                        
+                        if (response.success) {
+                            // Limpar o carrinho localmente
+                            atualizarCarrinhoUI([]);
+                            
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sucesso!',
+                                text: 'Pedido finalizado com sucesso.',
+                                allowOutsideClick: false
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro',
+                                text: response.message || 'Erro ao finalizar pedido. Tente novamente.'
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erro na requisição:', {xhr, status, error});
+                        let errorMessage = 'Erro ao finalizar pedido. Tente novamente.';
+                        
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response && response.message) {
+                                errorMessage = response.message;
+                            }
+                        } catch (e) {
+                            console.error('Erro ao parsear resposta:', e);
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro',
+                            text: errorMessage
+                        });
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+
+<!-- Botão de teste -->
+<button onclick="testarAPI()" class="btn btn-info" style="position: fixed; bottom: 20px; right: 20px;">
+    Testar API
+</button>
+</body>
+</html> 
