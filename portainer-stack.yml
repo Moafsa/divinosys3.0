@@ -1,0 +1,78 @@
+version: "3.7"
+
+services:
+  divinosys:
+    image: php:8.0-apache
+    command: >
+      bash -c "apt-get update && 
+      apt-get install -y libzip-dev zip unzip libpng-dev libjpeg-dev libfreetype6-dev &&
+      docker-php-ext-configure gd --with-freetype --with-jpeg &&
+      docker-php-ext-install pdo pdo_mysql gd zip &&
+      a2enmod rewrite &&
+      apache2-foreground"
+    volumes:
+      - divinosys_data:/var/www/html
+    networks:
+      - network_public
+    environment:
+      # Database Configuration
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=pdv_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=122334Qw!!Conext
+      
+      # Application
+      - APP_NAME=DivinoSys
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=https://divinosys.conext.click
+      
+      # PHP Configuration
+      - PHP_UPLOAD_MAX_FILESIZE=64M
+      - PHP_POST_MAX_SIZE=64M
+      - PHP_MEMORY_LIMIT=128M
+      
+      # Apache Configuration
+      - VIRTUAL_HOST=divinosys.conext.click
+      - APACHE_SERVER_NAME=divinosys.conext.click
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.middlewares.redirect-https.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.redirect-https.redirectscheme.permanent=true"
+        - "traefik.http.routers.divinosys.rule=Host(`divinosys.conext.click`)"
+        - "traefik.http.routers.divinosys.entrypoints=websecure"
+        - "traefik.http.routers.divinosys.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.divinosys-http.rule=Host(`divinosys.conext.click`)"
+        - "traefik.http.routers.divinosys-http.entrypoints=web"
+        - "traefik.http.routers.divinosys-http.middlewares=redirect-https@docker"
+        - "traefik.http.services.divinosys.loadbalancer.server.port=80"
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+networks:
+  network_public:
+    external: true
+    name: network_public
+
+volumes:
+  divinosys_data:
+    external: true
+    name: pdv_data 
