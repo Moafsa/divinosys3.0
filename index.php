@@ -19,7 +19,7 @@ error_reporting(E_ALL);
 
 // Definir constantes
 define('DEFAULT_VIEW', 'Dashboard1');
-define('SYSTEM_CLASS_PATH', 'MVC/CLASSES/system.class.php');
+define('SYSTEM_CLASS_PATH', 'MVC/classes/system.class.php');
 define('ROOT_PATH', dirname(__FILE__));
 
 // Helper function for assets
@@ -159,7 +159,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
         // Validar e sanitizar o parâmetro view
         $view = DEFAULT_VIEW;
         if (isset($_GET['view'])) {
-            $allowedViews = require_once(ROOT_PATH . "/MVC/CONFIG/views.php");
+            $allowedViews = require_once(ROOT_PATH . "/MVC/config/views.php");
             $requestedView = trim(filter_var($_GET['view'], FILTER_SANITIZE_STRING));
             if (in_array($requestedView, $allowedViews)) {
                 $view = $requestedView;
