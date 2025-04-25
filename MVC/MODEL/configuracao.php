@@ -138,7 +138,7 @@ if (isset($_POST['cad_mesas'])) {
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Defina a cor das abas:</h5>
-                <form action="<?php echo $config->url('MVC/MODEL/salvar_configuracao.php'); ?>" method="POST">
+                <form action="<?php echo api_url('salvar_configuracao.php'); ?>" method="POST">
                     <div class="mb-3">
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="cor" id="verde" value="VERDE" <?php echo $cor == 'VERDE' ? 'checked' : ''; ?>>
@@ -172,7 +172,7 @@ if (isset($_POST['cad_mesas'])) {
         </div>
     </div>
 
-    <script src="<?php echo $config->url('assets/js/jquery.min.js'); ?>"></script>
-    <script src="<?php echo $config->url('assets/js/bootstrap.min.js'); ?>"></script>
+    <script src="<?php echo js_asset('jquery'); ?>"></script>
+    <script src="<?php echo js_asset('bootstrap'); ?>"></script>
 </body>
 </html>

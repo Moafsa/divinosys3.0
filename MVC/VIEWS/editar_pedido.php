@@ -496,7 +496,7 @@ $(document).ready(function() {
         
         // Carregar produtos da categoria
         $.ajax({
-            url: 'MVC/MODEL/buscar_produtos_categoria.php',
+            url: '<?php echo api_url("buscar_produtos_categoria.php"); ?>',
             type: 'GET',
             data: { categoria_id: categoriaId },
             beforeSend: function() {
@@ -517,7 +517,7 @@ function buscarProdutos(termo) {
     if (!termo) return;
     
     $.ajax({
-        url: 'MVC/MODEL/buscar_produtos_nome.php',
+        url: '<?php echo api_url("buscar_produtos_nome.php"); ?>',
         type: 'GET',
         data: { termo: termo },
         beforeSend: function() {
@@ -544,7 +544,7 @@ async function carregarIngredientes(produtoId) {
 
     try {
         console.log('Carregando ingredientes para produto:', produtoId); // Debug
-        const response = await fetch(`MVC/MODEL/buscar_ingredientes.php?produto_id=${produtoId}`);
+        const response = await fetch('<?php echo api_url("buscar_ingredientes.php"); ?>?produto_id=' + produtoId);
         
         if (!response.ok) {
             const errorText = await response.text();
@@ -627,7 +627,7 @@ async function selecionarProduto(produtoId) {
 
     try {
         // Buscar dados do produto
-        const response = await fetch(`MVC/MODEL/buscar_produto.php?id=${produtoId}`);
+        const response = await fetch('<?php echo api_url("buscar_produto.php"); ?>?id=' + produtoId);
         if (!response.ok) throw new Error('Erro ao buscar produto');
         const data = await response.json();
         
@@ -766,7 +766,7 @@ function salvarEdicao(event) {
                 }
             });
             
-            fetch('MVC/MODEL/salvar_edicao_pedido.php', {
+            fetch('<?php echo api_url("salvar_edicao_pedido.php"); ?>', {
                 method: 'POST',
                 body: formData
             })
@@ -815,13 +815,13 @@ function salvarEdicao(event) {
 // Função para imprimir pedido
 function imprimirPedido() {
     const idpedido = document.querySelector('[name="idpedido"]').value;
-    window.open(`MVC/VIEWS/imprimir_pedido.php?pedido_id=${idpedido}`, '_blank');
+    window.open('<?php echo api_url("imprimir_pedido.php"); ?>?pedido_id=' + idpedido, '_blank');
 }
 
 // Função para imprimir pedido para cozinha
 function imprimirCozinha() {
     const idpedido = document.querySelector('[name="idpedido"]').value;
-    window.open(`MVC/VIEWS/imprimir_cozinha.php?pedido_id=${idpedido}`, '_blank');
+    window.open('<?php echo api_url("imprimir_cozinha.php"); ?>?pedido_id=' + idpedido, '_blank');
 }
 
 // Carregar ingredientes ao iniciar a página

@@ -1,4 +1,4 @@
-FROM php:8.0-apache
+FROM php:8.1-apache
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -66,6 +66,26 @@ chmod -R 777 /var/www/html/logs\n\
 chmod -R 755 /var/www/html/MVC/config\n\
 exec apache2-foreground' > /usr/local/bin/docker-entrypoint.sh \
     && chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Create directories
+RUN mkdir -p /var/www/html/MVC/COMMON/{css,js,img,vendor,fonts,uploads} \
+    && mkdir -p /var/www/html/uploads \
+    && mkdir -p /var/www/html/logs \
+    && chown -R www-data:www-data /var/www/html
+
+# Configure Apache
+RUN echo '<Directory /var/www/html/>\n\
+    Options Indexes FollowSymLinks\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>' > /etc/apache2/conf-available/docker-php.conf \
+    && a2enconf docker-php
+
+# Execute asset reorganization
+RUN php /var/www/html/reorganize-assets.php
+
+# Configure DocumentRoot
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
 EXPOSE 80
 

@@ -283,7 +283,7 @@ function verPedido(pedidoId) {
     const conteudo = document.getElementById('pedidoConteudo');
     
     // Buscar detalhes do pedido via AJAX
-    fetch(`MVC/MODEL/buscar_pedido.php?pedido_id=${pedidoId}`)
+    fetch('<?php echo api_url("buscar_pedido.php"); ?>?pedido_id=' + pedidoId)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -421,7 +421,7 @@ function fecharModal() {
 
 function fecharPedido(pedidoId) {
     if (confirm('Tem certeza que deseja fechar este pedido?')) {
-        fetch('MVC/MODEL/atualizar_status_pedido.php', {
+        fetch('<?php echo api_url("atualizar_status_pedido.php"); ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

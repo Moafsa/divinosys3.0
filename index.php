@@ -22,10 +22,8 @@ define('DEFAULT_VIEW', 'Dashboard1');
 define('SYSTEM_CLASS_PATH', 'MVC/CLASSES/system.class.php');
 define('ROOT_PATH', dirname(__FILE__));
 
-// Helper function for assets
-function asset($path) {
-    return '/assets/' . ltrim($path, '/');
-}
+// Incluir helpers
+require_once ROOT_PATH . "/MVC/helpers/asset_helper.php";
 
 // Iniciar sessão
 if (session_status() === PHP_SESSION_NONE) {
@@ -82,15 +80,20 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
 
   <title>Divinosys 1.0</title>
 
-  <!-- Bootstrap CSS -->
-  <link href="<?php echo asset('vendor/bootstrap/css/bootstrap.min.css'); ?>" rel="stylesheet">
+  <!-- CSS -->
+  <link href="<?php echo css_asset('bootstrap'); ?>" rel="stylesheet">
+  <link href="<?php echo css_asset('animate'); ?>" rel="stylesheet">
+  <link href="<?php echo css_asset('datepicker'); ?>" rel="stylesheet">
+  <link href="<?php echo css_asset('fontawesome'); ?>" rel="stylesheet">
+  <link href="<?php echo css_asset('sb-admin'); ?>" rel="stylesheet">
+  <link href="<?php echo css_asset('custom'); ?>" rel="stylesheet">
+  <link href="<?php echo css_asset('sidebar'); ?>" rel="stylesheet">
+  
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link href="<?php echo asset('vendor/fontawesome-free/css/all.min.css'); ?>" rel="stylesheet">
-  <!-- Custom Login CSS -->
-  <link href="<?php echo asset('css/login-style.css'); ?>" rel="stylesheet"/>
-  <link rel="shortcut icon" href="<?php echo asset('img/beer.png'); ?>">
+  
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="<?php echo img_asset('favicon'); ?>">
 </head>
 
 <body>
@@ -101,7 +104,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
         <p>Sistema de Gestão de Pedidos</p>
       </div>
       
-      <form method="POST" action="MVC/MODEL/login.php">
+      <form method="POST" action="<?php echo ensure_https($_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']); ?>/MVC/MODEL/login.php">
         <div class="form-group">
           <label for="login">Login</label>
           <div class="input-icon">
@@ -133,16 +136,22 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
       </form>
 
       <div class="login-links">
-        <a href="recuperar_senha.php">Esqueceu a senha?</a>
+        <a href="<?php echo ensure_https($_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']); ?>/recuperar_senha.php">Esqueceu a senha?</a>
         <br>
-        <a href="cadastrar_administrador.php">Cadastrar Administrador</a>
+        <a href="<?php echo ensure_https($_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']); ?>/cadastrar_administrador.php">Cadastrar Administrador</a>
       </div>
     </div>
   </div>
 
   <!-- Scripts -->
-  <script src="<?php echo asset('vendor/jquery/jquery.min.js'); ?>"></script>
-  <script src="<?php echo asset('vendor/bootstrap/js/bootstrap.bundle.min.js'); ?>"></script>
+  <script src="<?php echo js_asset('jquery'); ?>"></script>
+  <script src="<?php echo js_asset('bootstrap-bundle'); ?>"></script>
+  <script src="<?php echo js_asset('jquery-easing'); ?>"></script>
+  <script src="<?php echo js_asset('sb-admin'); ?>"></script>
+  <script src="<?php echo js_asset('chart'); ?>"></script>
+  <script src="<?php echo js_asset('bootstrap'); ?>"></script>
+  <script src="<?php echo js_asset('datepicker'); ?>"></script>
+  <script src="<?php echo js_asset('datepicker-ptbr'); ?>"></script>
 </body>
 </html>
 

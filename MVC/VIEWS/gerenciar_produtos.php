@@ -70,7 +70,7 @@ function escape($str) {
                                              class="img-thumbnail" 
                                              style="max-width: 50px;">
                                     <?php else: ?>
-                                        <img src="assets/img/no-image.png" 
+                                        <img src="<?php echo asset_url('img/no-image.png'); ?>"
                                              alt="Sem imagem" 
                                              class="img-thumbnail" 
                                              style="max-width: 50px;">
