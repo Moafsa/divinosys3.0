@@ -47,25 +47,26 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Create required directories
-RUN mkdir -p /var/www/html/uploads \
-    && mkdir -p /var/www/html/logs \
-    && mkdir -p /var/www/html/MVC/CONFIG
-
 # Copy application files
 COPY . /var/www/html/
-
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html \
-    && chmod -R 777 /var/www/html/uploads \
-    && chmod -R 777 /var/www/html/logs \
-    && chmod -R 755 /var/www/html/MVC/CONFIG
 
 # Configure PHP upload limits
 RUN echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/uploads.ini \
     && echo "post_max_size = 64M" >> /usr/local/etc/php/conf.d/uploads.ini
 
+# Create entrypoint script
+RUN echo '#!/bin/bash\n\
+mkdir -p /var/www/html/uploads\n\
+mkdir -p /var/www/html/logs\n\
+mkdir -p /var/www/html/MVC/config\n\
+chown -R www-data:www-data /var/www/html\n\
+chmod -R 755 /var/www/html\n\
+chmod -R 777 /var/www/html/uploads\n\
+chmod -R 777 /var/www/html/logs\n\
+chmod -R 755 /var/www/html/MVC/config\n\
+exec apache2-foreground' > /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

@@ -159,7 +159,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
         // Validar e sanitizar o parâmetro view
         $view = DEFAULT_VIEW;
         if (isset($_GET['view'])) {
-            $allowedViews = require_once(ROOT_PATH . "/MVC/CONFIG/views.php");
+            $allowedViews = require_once(ROOT_PATH . "/MVC/config/views.php");
             $requestedView = trim(filter_var($_GET['view'], FILTER_SANITIZE_STRING));
             if (in_array($requestedView, $allowedViews)) {
                 $view = $requestedView;
