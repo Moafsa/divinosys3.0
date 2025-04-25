@@ -84,9 +84,6 @@ RUN echo '<Directory /var/www/html/>\n\
 # Execute asset reorganization
 RUN php /var/www/html/reorganize-assets.php
 
-# Configure DocumentRoot
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
-
 EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
