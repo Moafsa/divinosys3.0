@@ -142,7 +142,7 @@
 
               <!-- CRIA O FORMULÁRIO PARA CADASTRAR E ENVIAR PELO METODO POST PARA O SCRIPT "cadastrar_produtos.php" -->
               <?php $hojehoras = date('Y-m-d'.' 00:00:00');?>
-              <form method="POST" action="mvc/model/cadastrar_atividade.php">
+          <form method="POST" action="MVC/MODEL/cadastrar_atividade.php">
                 <div class="form-group">
                   <label for="recipient-name" class="col-form-label">Título:</label>
                   <input name="title" type="text" class="form-control" >
@@ -400,7 +400,7 @@
       </div>
 
                 <div class="modal-body">
-            <form class="form-horizontal" method="POST" action="mvc/model/configuracao.php"><!--chama o arqui php para cadastrar-->
+        <form class="form-horizontal" method="POST" action="MVC/MODEL/configuracao.php"><!--chama o arqui php para cadastrar-->
               <div class="form-group">
                 <label for="inputEmail3" class="col-sm-2 control-label">Mesas</label>
                 <div class="col-sm-10">

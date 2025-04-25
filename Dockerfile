@@ -1,4 +1,4 @@
-FROM php:8.1-apache
+FROM php:8.2-apache
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -10,23 +10,16 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     libzip-dev \
-    default-mysql-client \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    default-mysql-client
+
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-    pdo_mysql \
-    mysqli \
-    mbstring \
-    exif \
-    pcntl \
-    bcmath \
-    gd \
-    zip
+RUN docker-php-ext-install pdo_mysql && \
+    docker-php-ext-install mysqli && \
+    docker-php-ext-enable mysqli && \
+    docker-php-ext-install mbstring exif pcntl bcmath gd zip
 
 # Enable Apache modules
 RUN a2enmod rewrite headers
@@ -35,55 +28,25 @@ RUN a2enmod rewrite headers
 WORKDIR /var/www/html
 
 # Configure timezone
-RUN ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime \
-    && echo "America/Sao_Paulo" > /etc/timezone \
-    && dpkg-reconfigure -f noninteractive tzdata
+RUN ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
+RUN echo "America/Sao_Paulo" > /etc/timezone
+RUN dpkg-reconfigure -f noninteractive tzdata
 
 # Configure PHP
-COPY docker/php/custom.ini $PHP_INI_DIR/conf.d/
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY docker/php/custom.ini $PHP_INI_DIR/conf.d/
 
 # Configure Apache
 COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Copy application files
-COPY . /var/www/html/
-
-# Configure PHP upload limits
-RUN echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "post_max_size = 64M" >> /usr/local/etc/php/conf.d/uploads.ini
-
-# Create entrypoint script
-RUN echo '#!/bin/bash\n\
-mkdir -p /var/www/html/uploads\n\
-mkdir -p /var/www/html/logs\n\
-mkdir -p /var/www/html/MVC/config\n\
-chown -R www-data:www-data /var/www/html\n\
-chmod -R 755 /var/www/html\n\
-chmod -R 777 /var/www/html/uploads\n\
-chmod -R 777 /var/www/html/logs\n\
-chmod -R 755 /var/www/html/MVC/config\n\
-exec apache2-foreground' > /usr/local/bin/docker-entrypoint.sh \
-    && chmod +x /usr/local/bin/docker-entrypoint.sh
-
-# Create directories
-RUN mkdir -p /var/www/html/MVC/COMMON/{css,js,img,vendor,fonts,uploads} \
-    && mkdir -p /var/www/html/uploads \
-    && mkdir -p /var/www/html/logs \
-    && chown -R www-data:www-data /var/www/html
-
-# Configure Apache
-RUN echo '<Directory /var/www/html/>\n\
-    Options Indexes FollowSymLinks\n\
-    AllowOverride All\n\
-    Require all granted\n\
-</Directory>' > /etc/apache2/conf-available/docker-php.conf \
-    && a2enconf docker-php
-
-# Execute asset reorganization
-RUN php /var/www/html/reorganize-assets.php
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html
+RUN chmod -R 755 /var/www/html
 
 EXPOSE 80
 
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+COPY . /var/www/html/
+
+RUN chown -R www-data:www-data /var/www/html 

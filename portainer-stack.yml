@@ -1,42 +1,71 @@
-version: '3.8'
+version: "3.7"
 
 services:
-  web:
-    image: divinosys:latest
-    ports:
-      - "80:80"
-      - "443:443"
+  divinosys:
+    image: php:8.0-apache
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
-      - pdv_data:/var/www/html
-      - ./logs:/var/www/html/logs
-      - ./uploads:/var/www/html/uploads
-      - ./MVC/COMMON:/var/www/html/MVC/COMMON
-    environment:
-      - MYSQL_HOST=mysql
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=122334Qw!!Conext
-      - MYSQL_DATABASE=pdv_db
+      - divinosys_data:/var/www/html
+      - ./docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ./docker/apache/000-default.conf:/etc/apache2/sites-available/000-default.conf
     networks:
-      - pdv_network
-    depends_on:
-      - mysql
-
-  mysql:
-    image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
+      - network_public
     environment:
-      - MYSQL_ROOT_PASSWORD=122334Qw!!Conext
-      - MYSQL_DATABASE=pdv_db
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./database:/docker-entrypoint-initdb.d
-    networks:
-      - pdv_network
-
-volumes:
-  mysql_data:
-  pdv_data:
+      # Database Configuration
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=pdv_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=122334Qw!!Conext
+      
+      # Application
+      - APP_NAME=DivinoSys
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=https://divinosys.conext.click
+      
+      # PHP Configuration
+      - PHP_UPLOAD_MAX_FILESIZE=64M
+      - PHP_POST_MAX_SIZE=64M
+      - PHP_MEMORY_LIMIT=128M
+      
+      # Apache Configuration
+      - VIRTUAL_HOST=divinosys.conext.click
+      - APACHE_SERVER_NAME=divinosys.conext.click
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.middlewares.redirect-https.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.redirect-https.redirectscheme.permanent=true"
+        - "traefik.http.routers.divinosys.rule=Host(`divinosys.conext.click`)"
+        - "traefik.http.routers.divinosys.entrypoints=websecure"
+        - "traefik.http.routers.divinosys.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.divinosys-http.rule=Host(`divinosys.conext.click`)"
+        - "traefik.http.routers.divinosys-http.entrypoints=web"
+        - "traefik.http.routers.divinosys-http.middlewares=redirect-https@docker"
+        - "traefik.http.services.divinosys.loadbalancer.server.port=80"
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
 networks:
-  pdv_network:
-    driver: overlay 
+  network_public:
+    external: true
+    name: network_public
+
+volumes:
+  divinosys_data:
+    external: true
+    name: pdv_data 

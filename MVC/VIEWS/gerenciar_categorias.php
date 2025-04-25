@@ -73,7 +73,7 @@ if (isset($_SESSION['msg'])) {
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-        <form action="<?php echo api_url('salvar_categoria.php'); ?>" method="POST" enctype="multipart/form-data">
+        <form action="MVC/MODEL/salvar_categoria.php" method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Nome da Categoria</label>
@@ -104,7 +104,7 @@ if (isset($_SESSION['msg'])) {
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-<form action="<?php echo api_url('salvar_categoria.php'); ?>" method="POST" enctype="multipart/form-data">
+<form action="MVC/MODEL/salvar_categoria.php" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="id" id="edit_id">
                 <div class="modal-body">
 <div class="form-group">

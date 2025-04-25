@@ -269,7 +269,7 @@ const searchProducts = debounce(function() {
     }
 
     $.ajax({
-        url: '<?php echo api_url("buscar_produto.php"); ?>',
+        url: 'MVC/MODEL/buscar_produtos.php',
         method: 'GET',
         data: {
             termo: searchTerm,
@@ -346,7 +346,7 @@ $('#btnAddToOrder').on('click', function() {
     };
 
     $.ajax({
-        url: '<?php echo api_url("adicionar_pedido.php"); ?>',
+        url: $('#formNovoPedido').attr('action'),
         method: 'POST',
         data: formData,
         success: function(response) {

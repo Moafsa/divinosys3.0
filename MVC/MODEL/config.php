@@ -120,16 +120,8 @@ $this->baseUrl = $this->detectBaseUrl();
 
 // Função global para facilitar o uso
 if (!function_exists('url')) {
-    /**
-     * Generate a full URL with HTTPS
-     * 
-     * @param string $path The path to append to the base URL
-     * @return string The complete URL
-     */
     function url($path = '') {
-        $protocol = 'https://';
-        $host = $_SERVER['HTTP_HOST'];
-        return $protocol . $host . '/' . ltrim($path, '/');
+        return Config::getInstance()->url($path);
     }
 }
 
@@ -137,30 +129,6 @@ if (!function_exists('url')) {
 if (!function_exists('assets')) {
     function assets($path = '') {
         return Config::getInstance()->assets($path);
-    }
-}
-
-if (!function_exists('api_url')) {
-    /**
-     * Generate a full API URL with HTTPS
-     * 
-     * @param string $path The API endpoint path
-     * @return string The complete API URL
-     */
-    function api_url($path = '') {
-        return url('MVC/MODEL/' . ltrim($path, '/'));
-    }
-}
-
-if (!function_exists('asset_url')) {
-    /**
-     * Generate a full asset URL with HTTPS
-     * 
-     * @param string $path The asset path
-     * @return string The complete asset URL
-     */
-    function asset_url($path = '') {
-        return url('MVC/COMMON/' . ltrim($path, '/'));
     }
 }
 

@@ -30,11 +30,11 @@ if ($login == null) {?>
 
     <title>Divinosys 1.0</title>
 
-    <link href="MVC/COMMON/css/animate.min.css" rel="stylesheet"/>
-    <link href="MVC/COMMON/css/bootstrap-datepicker.css" rel="stylesheet"/>
+    <link href="MVC/COMMON/CSS/animate.min.css" rel="stylesheet"/>
+    <link href="MVC/COMMON/CSS/bootstrap-datepicker.css" rel="stylesheet"/>
     <link href="MVC/COMMON/VENDOR/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link href="MVC/COMMON/css/sb-admin-2.min.css" rel="stylesheet">
-    <link rel="shortcut icon" href="MVC/COMMON/img/beer.png">
+    <link href="MVC/COMMON/CSS/sb-admin-2.min.css" rel="stylesheet">
+    <link rel="shortcut icon" href="MVC/COMMON/IMG/beer.png">
 
     <style>
       body {

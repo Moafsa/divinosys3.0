@@ -457,7 +457,7 @@ foreach ($pedidos as $pedido) {
             
             console.log('Atualizando status:', { pedidoId, novoStatus });
             
-            fetch('<?php echo api_url("atualizar_status_pedido.php"); ?>', {
+            fetch('MVC/MODEL/atualizar_status_pedido.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

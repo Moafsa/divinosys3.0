@@ -20,10 +20,10 @@ if($select_table['login'] != null){
 
     <title>Divinosys 1.0</title>
 
-    <link href="MVC/COMMON/css/animate.min.css" rel="stylesheet"/><!--ESTE COMANDO CRIA A NOTIFICAÇÃO ANIMADA  -->
-    <link href="MVC/COMMON/css/bootstrap-datepicker.css" rel="stylesheet"/>
+    <link href="MVC/COMMON/CSS/animate.min.css" rel="stylesheet"/><!--ESTE COMANDO CRIA A NOTIFICAÇÃO ANIMADA  -->
+    <link href="MVC/COMMON/CSS/bootstrap-datepicker.css" rel="stylesheet"/>
 
-    <link rel="shortcut icon"  href="MVC/COMMON/img/beer.png"><!--este comando muda o icone da janela-->
+    <link rel="shortcut icon"  href="MVC/COMMON/IMG/beer.png"><!--este comando muda o icone da janela-->
 
     <!-- Custom fonts for this template-->
     <link href="MVC/COMMON/VENDOR/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -31,7 +31,7 @@ if($select_table['login'] != null){
 
 
     <!-- Custom styles for this template-->
-    <link href="MVC/COMMON/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="MVC/COMMON/CSS/sb-admin-2.min.css" rel="stylesheet">
     
   </head>
 
@@ -110,10 +110,10 @@ if($select_table['login'] != null){
 
     <title>Divinosys 1.0</title>
 
-    <link href="MVC/COMMON/css/animate.min.css" rel="stylesheet"/><!--ESTE COMANDO CRIA A NOTIFICAÇÃO ANIMADA  -->
-    <link href="MVC/COMMON/css/bootstrap-datepicker.css" rel="stylesheet"/>
+    <link href="MVC/COMMON/CSS/animate.min.css" rel="stylesheet"/><!--ESTE COMANDO CRIA A NOTIFICAÇÃO ANIMADA  -->
+    <link href="MVC/COMMON/CSS/bootstrap-datepicker.css" rel="stylesheet"/>
 
-    <link rel="shortcut icon"  href="MVC/COMMON/img/beer.png"><!--este comando muda o icone da janela-->
+    <link rel="shortcut icon"  href="MVC/COMMON/IMG/beer.png"><!--este comando muda o icone da janela-->
 
     <!-- Custom fonts for this template-->
     <link href="MVC/COMMON/VENDOR/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -121,7 +121,7 @@ if($select_table['login'] != null){
 
 
     <!-- Custom styles for this template-->
-    <link href="MVC/COMMON/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="MVC/COMMON/CSS/sb-admin-2.min.css" rel="stylesheet">
     
   </head>
 

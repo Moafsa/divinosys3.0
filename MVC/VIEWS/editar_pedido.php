@@ -332,14 +332,14 @@ try {
             <!-- Menu de Categorias -->
             <div class="category-menu">
                 <?php while ($categoria = mysqli_fetch_assoc($categorias)): 
-                    $imagem = $categoria['imagem'] ? $categoria['imagem'] : 'mvc/common/img/no-image.jpg';
+                $imagem = $categoria['imagem'] ? $categoria['imagem'] : 'MVC/COMMON/img/no-image.jpg';
                 ?>
                     <div class="category-item <?php echo ($categoria['id'] == $pedido['categoria_id']) ? 'active' : ''; ?>" 
                          data-categoria="<?php echo $categoria['id']; ?>">
                         <img src="<?php echo $imagem; ?>" 
                              alt="<?php echo htmlspecialchars($categoria['nome']); ?>" 
                              class="category-image"
-                             onerror="this.src='mvc/common/img/no-image.jpg'">
+                         onerror="this.src='MVC/COMMON/img/no-image.jpg'">
                         <span class="category-name"><?php echo htmlspecialchars($categoria['nome']); ?></span>
                     </div>
                 <?php endwhile; ?>
@@ -348,14 +348,14 @@ try {
             <!-- Lista de Produtos -->
             <div class="row" id="listaProdutos">
                 <?php if (isset($produtos)): ?>
-                    <?php while ($produto = mysqli_fetch_assoc($produtos)): ?>
+<?php while ($produto = mysqli_fetch_assoc($produtos)): ?>
                         <div class="col-md-4 mb-4">
                             <div class="product-card <?php echo ($produto['id'] == $pedido['produto_id']) ? 'active' : ''; ?>"
                                  onclick="selecionarProduto(<?php echo $produto['id']; ?>)">
-                                <img src="<?php echo $produto['imagem'] ?? 'mvc/common/img/no-image.jpg'; ?>" 
+                            <img src="<?php echo $produto['imagem'] ?? 'MVC/COMMON/img/no-image.jpg'; ?>" 
                                      class="product-img" 
                                      alt="<?php echo htmlspecialchars($produto['nome']); ?>"
-                                     onerror="this.src='mvc/common/img/no-image.jpg'">
+                                 onerror="this.src='MVC/COMMON/img/no-image.jpg'">
                                 <div class="product-info">
                                     <h5><?php echo htmlspecialchars($produto['nome']); ?></h5>
                                     <p class="text-muted small mb-2"><?php echo htmlspecialchars($produto['descricao']); ?></p>
@@ -496,7 +496,7 @@ $(document).ready(function() {
         
         // Carregar produtos da categoria
         $.ajax({
-            url: '<?php echo api_url("buscar_produtos_categoria.php"); ?>',
+            url: 'MVC/MODEL/buscar_produtos_categoria.php',
             type: 'GET',
             data: { categoria_id: categoriaId },
             beforeSend: function() {
@@ -517,7 +517,7 @@ function buscarProdutos(termo) {
     if (!termo) return;
     
     $.ajax({
-        url: '<?php echo api_url("buscar_produtos_nome.php"); ?>',
+        url: 'MVC/MODEL/buscar_produtos_nome.php',
         type: 'GET',
         data: { termo: termo },
         beforeSend: function() {
@@ -544,7 +544,7 @@ async function carregarIngredientes(produtoId) {
 
     try {
         console.log('Carregando ingredientes para produto:', produtoId); // Debug
-        const response = await fetch('<?php echo api_url("buscar_ingredientes.php"); ?>?produto_id=' + produtoId);
+        const response = await fetch(`MVC/MODEL/buscar_ingredientes.php?produto_id=${produtoId}`);
         
         if (!response.ok) {
             const errorText = await response.text();
@@ -627,7 +627,7 @@ async function selecionarProduto(produtoId) {
 
     try {
         // Buscar dados do produto
-        const response = await fetch('<?php echo api_url("buscar_produto.php"); ?>?id=' + produtoId);
+        const response = await fetch(`MVC/MODEL/buscar_produto.php?id=${produtoId}`);
         if (!response.ok) throw new Error('Erro ao buscar produto');
         const data = await response.json();
         
@@ -766,7 +766,7 @@ function salvarEdicao(event) {
                 }
             });
             
-            fetch('<?php echo api_url("salvar_edicao_pedido.php"); ?>', {
+            fetch('MVC/MODEL/salvar_edicao_pedido.php', {
                 method: 'POST',
                 body: formData
             })
@@ -815,13 +815,13 @@ function salvarEdicao(event) {
 // Função para imprimir pedido
 function imprimirPedido() {
     const idpedido = document.querySelector('[name="idpedido"]').value;
-    window.open('<?php echo api_url("imprimir_pedido.php"); ?>?pedido_id=' + idpedido, '_blank');
+    window.open(`MVC/VIEWS/imprimir_pedido.php?pedido_id=${idpedido}`, '_blank');
 }
 
 // Função para imprimir pedido para cozinha
 function imprimirCozinha() {
     const idpedido = document.querySelector('[name="idpedido"]').value;
-    window.open('<?php echo api_url("imprimir_cozinha.php"); ?>?pedido_id=' + idpedido, '_blank');
+    window.open(`MVC/VIEWS/imprimir_cozinha.php?pedido_id=${idpedido}`, '_blank');
 }
 
 // Carregar ingredientes ao iniciar a página

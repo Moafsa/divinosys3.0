@@ -474,7 +474,7 @@ $config = Config::getInstance();
 <script>
 function atualizarMesas() {
     // Primeiro, chamar o endpoint para corrigir o status das mesas
-    fetch('<?php echo api_url("corrigir_status_mesas.php"); ?>')
+    fetch('MVC/MODEL/corrigir_status_mesas.php')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Erro na resposta do servidor');
@@ -516,7 +516,7 @@ function abrirPedidoMesa(mesa_id) {
             verPedido(pedidoId);
         }
     } else {
-        window.location.href = '<?php echo url("?view=gerar_pedido&mesa="); ?>' + mesa_id;
+        window.location.href = '<?php echo $config->url("?view=gerar_pedido&mesa="); ?>' + mesa_id;
     }
 }
 
@@ -525,7 +525,7 @@ function verPedido(pedidoId) {
     const conteudo = document.getElementById('pedidoConteudo');
     
     // Buscar detalhes do pedido via AJAX
-    fetch('<?php echo api_url("buscar_pedido.php"); ?>?pedido_id=' + pedidoId)
+    fetch(`MVC/MODEL/buscar_pedido.php?pedido_id=${pedidoId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

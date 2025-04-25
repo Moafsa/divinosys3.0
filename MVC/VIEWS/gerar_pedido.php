@@ -587,7 +587,7 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
             console.log('Enviando requisição:', requestData);
     
     $.ajax({
-                url: '<?php echo api_url("buscar_produtos_categoria.php"); ?>',
+                url: '<?php echo $config->url("MVC/MODEL/buscar_produtos.php"); ?>',
                 method: 'POST',
                 data: JSON.stringify(requestData),
                 contentType: 'application/json',
@@ -682,7 +682,7 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
         function loadCategories() {
             console.log('Carregando categorias...');
         $.ajax({
-                url: '<?php echo api_url("buscar_categorias.php"); ?>',
+                url: '<?php echo $config->url("MVC/MODEL/buscar_categorias.php"); ?>',
             method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -774,7 +774,7 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
         // Load cart from server
         function loadCart(mesaId) {
         $.ajax({
-                url: '<?php echo api_url("carrinho.php"); ?>',
+                url: '<?php echo $config->url("MVC/MODEL/carrinho.php"); ?>',
             method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -816,7 +816,7 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
                 // Carregar ingredientes
                 if (product.id) {
     $.ajax({
-                        url: '<?php echo api_url("buscar_ingredientes.php"); ?>',
+                        url: '<?php echo $config->url("MVC/MODEL/buscar_ingredientes.php"); ?>',
         method: 'GET',
                         data: { produto_id: product.id },
                         dataType: 'json',
@@ -979,7 +979,7 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
             console.log('Enviando item para o carrinho:', cartItem);
 
     $.ajax({
-                url: '<?php echo api_url("adicionar_pedido.php"); ?>',
+                url: '<?php echo $config->url("MVC/MODEL/carrinho.php"); ?>',
         method: 'POST',
                 data: JSON.stringify(cartItem),
         contentType: 'application/json',
@@ -1073,7 +1073,7 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
             if (index >= 0 && index < cart.length) {
                 // Atualizar carrinho no servidor
                 $.ajax({
-                    url: '<?php echo api_url("carrinho.php"); ?>',
+                    url: '<?php echo $config->url("MVC/MODEL/carrinho.php"); ?>',
                     method: 'DELETE',
                     data: JSON.stringify({
                         mesa_id: mesaId,
@@ -1120,7 +1120,7 @@ function finalizarPedido() {
             console.log('Dados do pedido:', data);
 
     $.ajax({
-                url: '<?php echo api_url("salvar_pedido.php"); ?>',
+                url: '<?php echo $config->url("MVC/MODEL/finalizar_pedido.php"); ?>',
         method: 'POST',
                 data: JSON.stringify(data),
                 contentType: 'application/json',

@@ -6,26 +6,16 @@
     <title>Dashboard - Divino Lanches</title>
     
     <!-- CSS -->
-    <link href="<?php echo css_asset('bootstrap'); ?>" rel="stylesheet">
-    <link href="<?php echo css_asset('animate'); ?>" rel="stylesheet">
-    <link href="<?php echo css_asset('datepicker'); ?>" rel="stylesheet">
-    <link href="<?php echo css_asset('fontawesome'); ?>" rel="stylesheet">
-    <link href="<?php echo css_asset('sb-admin'); ?>" rel="stylesheet">
-    <link href="<?php echo css_asset('custom'); ?>" rel="stylesheet">
-    <link href="<?php echo css_asset('sidebar'); ?>" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     
-    <!-- Favicon -->
-    <link rel="shortcut icon" href="<?php echo img_asset('favicon'); ?>">
+    <style>
+        /* Add your custom styles here */
+    </style>
 </head>
 <body>
     <!-- Scripts -->
-    <script src="<?php echo js_asset('jquery'); ?>"></script>
-    <script src="<?php echo js_asset('bootstrap-bundle'); ?>"></script>
-    <script src="<?php echo js_asset('jquery-easing'); ?>"></script>
-    <script src="<?php echo js_asset('sb-admin'); ?>"></script>
-    <script src="<?php echo js_asset('chart'); ?>"></script>
-    <script src="<?php echo js_asset('bootstrap'); ?>"></script>
-    <script src="<?php echo js_asset('datepicker'); ?>"></script>
-    <script src="<?php echo js_asset('datepicker-ptbr'); ?>"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 

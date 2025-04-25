@@ -21,21 +21,21 @@ $usuario = isset($_SESSION['nome']) ? $_SESSION['nome'] : (isset($_SESSION['user
 
   <title>Divinosys 1.0</title>
 
-  <link href="<?php echo url('MVC/COMMON/css/animate.min.css'); ?>" rel="stylesheet"/><!--ESTE COMANDO CRIA A NOTIFICAÇÃO ANIMADA  -->
-  <link href="<?php echo url('MVC/COMMON/css/bootstrap-datepicker.css'); ?>" rel="stylesheet"/>
+ink href="<?php echo url('MVC/COMMON/css/animate.min.css'); ?>" rel="stylesheet"/><!--ESTE COMANDO CRIA A NOTIFICAÇÃO ANIMADA  -->
+ink href="<?php echo url('MVC/COMMON/css/bootstrap-datepicker.css'); ?>" rel="stylesheet"/>
 
-  <link rel="shortcut icon"  href="<?php echo url('MVC/COMMON/img/beer.png'); ?>"><!--este comando muda o icone da janela-->
+ink rel="shortcut icon"  href="<?php echo url('MVC/COMMON/img/beer.png'); ?>"><!--este comando muda o icone da janela-->
 
   <!-- Custom fonts for this template-->
-  <link href="<?php echo url('MVC/COMMON/VENDOR/fontawesome-free/css/all.min.css'); ?>" rel="stylesheet" type="text/css">
+ink href="<?php echo url('MVC/COMMON/VENDOR/fontawesome-free/css/all.min.css'); ?>" rel="stylesheet" type="text/css">
   
   <!-- Bootstrap 5 CSS -->
   <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"> -->
 
   <!-- Custom styles for this template-->
-  <link href="<?php echo url('MVC/COMMON/css/sb-admin-2.min.css'); ?>" rel="stylesheet">
-  <link href="<?php echo url('MVC/COMMON/css/custom.css'); ?>" rel="stylesheet">
-  <link href="<?php echo url('MVC/COMMON/css/sidebar-fix.css'); ?>" rel="stylesheet">
+ink href="<?php echo url('MVC/COMMON/css/sb-admin-2.min.css'); ?>" rel="stylesheet">
+ink href="<?php echo url('MVC/COMMON/css/custom.css'); ?>" rel="stylesheet">
+ink href="<?php echo url('MVC/COMMON/css/sidebar-fix.css'); ?>" rel="stylesheet">
   
 </head>
 
@@ -45,24 +45,24 @@ $usuario = isset($_SESSION['nome']) ? $_SESSION['nome'] : (isset($_SESSION['user
 
   <!-- INICIO DA CHAMADA DA CLASSE JQUERY-->
   <!-- Bootstrap core JavaScript-->
-  <script src="<?php echo url('MVC/COMMON/VENDOR/jquery/jquery.min.js'); ?>"></script>
-  <script src="<?php echo url('MVC/COMMON/VENDOR/bootstrap/js/bootstrap.bundle.min.js'); ?>"></script>
+cript src="<?php echo url('MVC/COMMON/VENDOR/jquery/jquery.min.js'); ?>"></script>
+cript src="<?php echo url('MVC/COMMON/VENDOR/bootstrap/js/bootstrap.bundle.min.js'); ?>"></script>
   
   <!-- Bootstrap 5 JavaScript -->
   <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script> -->
 
   <!-- Core plugin JavaScript-->
-  <script src="<?php echo url('MVC/COMMON/VENDOR/jquery-easing/jquery.easing.min.js'); ?>"></script>
+cript src="<?php echo url('MVC/COMMON/VENDOR/jquery-easing/jquery.easing.min.js'); ?>"></script>
 
   <!-- Custom scripts for all pages-->
-  <script src="<?php echo url('MVC/COMMON/js/sb-admin-2.min.js'); ?>"></script>
+cript src="<?php echo url('MVC/COMMON/js/sb-admin-2.min.js'); ?>"></script>
   <!-- FIM DA CHAMADA DA CLASSE JQUERY-->
 
-  <script src="<?php echo url('MVC/COMMON/VENDOR/chart.js/Chart.min.js'); ?>"></script>
+cript src="<?php echo url('MVC/COMMON/VENDOR/chart.js/Chart.min.js'); ?>"></script>
 
-  <script src="<?php echo url('MVC/COMMON/VENDOR/bootstrap/js/bootstrap.min.js'); ?>"></script>
-  <script src="<?php echo url('MVC/COMMON/js/bootstrap-datepicker.min.js'); ?>"></script>
-  <script src="<?php echo url('MVC/COMMON/js/bootstrap-datepicker.pt-BR.min.js'); ?>"></script>
+cript src="<?php echo url('MVC/COMMON/VENDOR/bootstrap/js/bootstrap.min.js'); ?>"></script>
+cript src="<?php echo url('MVC/COMMON/js/bootstrap-datepicker.min.js'); ?>"></script>
+cript src="<?php echo url('MVC/COMMON/js/bootstrap-datepicker.pt-BR.min.js'); ?>"></script>
 <!-- FIM DA CHAMADA DOS SCRIPTS JS!-->
 
 
@@ -218,7 +218,7 @@ $usuario = isset($_SESSION['nome']) ? $_SESSION['nome'] : (isset($_SESSION['user
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <img class="img-profile rounded-circle" src="MVC/COMMON/img/User.png">
+<img class="img-profile rounded-circle" src="MVC/COMMON/img/User.png">
                 <label style="width: 15px;"></label>
                 <span class="text-center" style=" font-size: 25px; color: #888888;"><b><?php echo $usuario; ?></b></span>
                 

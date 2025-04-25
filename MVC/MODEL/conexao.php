@@ -23,63 +23,56 @@ if ($is_json_endpoint) {
 // Set default timezone
 date_default_timezone_set('America/Sao_Paulo');
 
-class Conexao {
-    private static $instance;
+// Database connection settings
+$servidor = "db"; // Docker service name from docker-compose.yml
+$usuario = "pdv";
+$senha = "pdv123";
+$dbname = "pdv";
 
-    public static function getConn() {
-        if (!isset(self::$instance)) {
-            try {
-                // Get environment variables with fallbacks
-                $host = getenv('DB_HOST') ?: 'mysql';
-                $dbname = getenv('DB_DATABASE') ?: 'pdv_db';
-                $user = getenv('DB_USERNAME') ?: 'root';
-                $pass = getenv('DB_PASSWORD') ?: '122334Qw!!Conext';
+// Debug: Print environment variables
+error_log("=== DEBUG: Variáveis de Ambiente ===");
+error_log("DB_HOST: " . ($servidor ?: 'não definido'));
+error_log("DB_USER: " . ($usuario ?: 'não definido'));
+error_log("DB_NAME: " . ($dbname ?: 'não definido'));
+error_log("DB_PASS: " . (empty($senha) ? 'vazio' : 'definido'));
 
-                // Log connection attempt
-                error_log("=== Database Connection Debug ===");
-                error_log("Host: " . $host);
-                error_log("Database: " . $dbname);
-                error_log("User: " . $user);
-                error_log("Current Directory: " . __DIR__);
-                error_log("Document Root: " . $_SERVER['DOCUMENT_ROOT']);
-                error_log("Environment Variables:");
-                error_log("DB_HOST: " . getenv('DB_HOST'));
-                error_log("DB_DATABASE: " . getenv('DB_DATABASE'));
-                error_log("DB_USERNAME: " . getenv('DB_USERNAME'));
+// Log connection attempt
+error_log("=== Iniciando nova tentativa de conexão ===");
+error_log("Servidor: " . $servidor);
+error_log("Banco: " . $dbname);
 
-                // Test DNS resolution
-                $ip = gethostbyname($host);
-                error_log("Resolved IP for {$host}: " . $ip);
-                if ($ip === $host) {
-                    error_log("WARNING: Could not resolve hostname");
-                }
+// Database connection
+$conn = mysqli_connect($servidor, $usuario, $senha, $dbname);
 
-                // Create PDO connection with extended timeout
-                $dsn = "mysql:host={$host};dbname={$dbname};connect_timeout=10";
-                self::$instance = new PDO(
-                    $dsn,
-                    $user,
-                    $pass,
-                    array(
-                        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
-                        PDO::ATTR_TIMEOUT => 10,
-                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-                    )
-                );
-                
-                error_log("=== Database connection successful ===");
-            } catch(PDOException $e) {
-                error_log("Connection Error Details: " . $e->getMessage());
-                if (getenv('APP_DEBUG') == 'true') {
-                    echo "Connection Error: " . $e->getMessage();
-                } else {
-                    echo "Connection Error: Could not connect to database.";
-                }
-                die();
-            }
-        }
-        return self::$instance;
+// If connection fails, display error message
+if (!$conn) {
+    echo "<div style='color: red; font-weight: bold; text-align: center; margin-top: 20px;'>";
+    echo "Connection Error: Could not connect to database.";
+    echo "</div>";
+    error_log("Main connection failure: " . mysqli_connect_error());
+    // Don't kill execution to allow page to load with appropriate message
+} else {
+    // Set charset to UTF-8
+    mysqli_set_charset($conn, "utf8");
+
+    // Set timezone to UTC in MySQL and handle conversion in PHP
+    try {
+        mysqli_query($conn, "SET time_zone = '+00:00'");
+        error_log("Timezone do MySQL configurado para UTC com sucesso!");
+    } catch (Exception $e) {
+        error_log("Aviso: Usando timezone padrão do MySQL: " . $e->getMessage());
     }
+
+    // Test if we can actually execute queries
+    $test_query = mysqli_query($conn, "SELECT 1");
+    if (!$test_query) {
+        throw new Exception("Erro ao executar query de teste: " . mysqli_error($conn));
+    }
+    error_log("Query de teste executada com sucesso!");
+
+    // Define constant to indicate successful connection
+    define('DB_CONNECTION_SUCCESS', true);
+    error_log("=== Conexão estabelecida com sucesso! ===");
 }
 
 // Function to safely close database connection
