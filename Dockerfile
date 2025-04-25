@@ -49,7 +49,8 @@ RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Create required directories
 RUN mkdir -p /var/www/html/uploads \
-    && mkdir -p /var/www/html/logs
+    && mkdir -p /var/www/html/logs \
+    && mkdir -p /var/www/html/MVC/CONFIG
 
 # Copy application files
 COPY . /var/www/html/
@@ -58,7 +59,8 @@ COPY . /var/www/html/
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && chmod -R 777 /var/www/html/uploads \
-    && chmod -R 777 /var/www/html/logs
+    && chmod -R 777 /var/www/html/logs \
+    && chmod -R 755 /var/www/html/MVC/CONFIG
 
 # Configure PHP upload limits
 RUN echo "upload_max_filesize = 64M" >> /usr/local/etc/php/conf.d/uploads.ini \
