@@ -13,8 +13,8 @@ function fixPaths($directory) {
         '/MVC\/VIEW/i' => 'MVC/VIEW',
         '/MVC\/CONTROLLER/i' => 'MVC/CONTROLLER',
         '/\/IMG\//i' => '/img/',
-        '/\/CSS\//i' => '/CSS/',
-        '/\/JS\//i' => '/JS/',
+        '/\/CSS\//i' => '/css/',
+        '/\/JS\//i' => '/js/',
         '/\/VENDOR\//i' => '/VENDOR/',
         
         // Convert HTTP to HTTPS
@@ -28,7 +28,11 @@ function fixPaths($directory) {
         
         // Fix image paths specifically
         '\/IMG\/beer\.png' => '/img/beer.png',
-        '\/IMG\/User\.png' => '/img/User.png'
+        '\/IMG\/User\.png' => '/img/User.png',
+        
+        // Fix CSS and JS paths specifically
+        'MVC\/COMMON\/CSS\/' => 'MVC/COMMON/css/',
+        'MVC\/COMMON\/JS\/' => 'MVC/COMMON/js/'
     ];
 
     foreach ($files as $file) {

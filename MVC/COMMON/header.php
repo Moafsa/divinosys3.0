@@ -21,8 +21,8 @@ $usuario = isset($_SESSION['nome']) ? $_SESSION['nome'] : (isset($_SESSION['user
 
   <title>Divinosys 1.0</title>
 
-  <link href="<?php echo url('MVC/COMMON/CSS/animate.min.css'); ?>" rel="stylesheet"/><!--ESTE COMANDO CRIA A NOTIFICAÇÃO ANIMADA  -->
-  <link href="<?php echo url('MVC/COMMON/CSS/bootstrap-datepicker.css'); ?>" rel="stylesheet"/>
+  <link href="<?php echo url('MVC/COMMON/css/animate.min.css'); ?>" rel="stylesheet"/><!--ESTE COMANDO CRIA A NOTIFICAÇÃO ANIMADA  -->
+  <link href="<?php echo url('MVC/COMMON/css/bootstrap-datepicker.css'); ?>" rel="stylesheet"/>
 
   <link rel="shortcut icon"  href="<?php echo url('MVC/COMMON/img/beer.png'); ?>"><!--este comando muda o icone da janela-->
 
@@ -33,9 +33,9 @@ $usuario = isset($_SESSION['nome']) ? $_SESSION['nome'] : (isset($_SESSION['user
   <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"> -->
 
   <!-- Custom styles for this template-->
-  <link href="<?php echo url('MVC/COMMON/CSS/sb-admin-2.min.css'); ?>" rel="stylesheet">
-  <link href="<?php echo url('MVC/COMMON/CSS/custom.css'); ?>" rel="stylesheet">
-  <link href="<?php echo url('MVC/COMMON/CSS/sidebar-fix.css'); ?>" rel="stylesheet">
+  <link href="<?php echo url('MVC/COMMON/css/sb-admin-2.min.css'); ?>" rel="stylesheet">
+  <link href="<?php echo url('MVC/COMMON/css/custom.css'); ?>" rel="stylesheet">
+  <link href="<?php echo url('MVC/COMMON/css/sidebar-fix.css'); ?>" rel="stylesheet">
   
 </head>
 
@@ -55,14 +55,14 @@ $usuario = isset($_SESSION['nome']) ? $_SESSION['nome'] : (isset($_SESSION['user
   <script src="<?php echo url('MVC/COMMON/VENDOR/jquery-easing/jquery.easing.min.js'); ?>"></script>
 
   <!-- Custom scripts for all pages-->
-  <script src="<?php echo url('MVC/COMMON/JS/sb-admin-2.min.js'); ?>"></script>
+  <script src="<?php echo url('MVC/COMMON/js/sb-admin-2.min.js'); ?>"></script>
   <!-- FIM DA CHAMADA DA CLASSE JQUERY-->
 
   <script src="<?php echo url('MVC/COMMON/VENDOR/chart.js/Chart.min.js'); ?>"></script>
 
   <script src="<?php echo url('MVC/COMMON/VENDOR/bootstrap/js/bootstrap.min.js'); ?>"></script>
-  <script src="<?php echo url('MVC/COMMON/JS/bootstrap-datepicker.min.js'); ?>"></script>
-  <script src="<?php echo url('MVC/COMMON/JS/bootstrap-datepicker.pt-BR.min.js'); ?>"></script>
+  <script src="<?php echo url('MVC/COMMON/js/bootstrap-datepicker.min.js'); ?>"></script>
+  <script src="<?php echo url('MVC/COMMON/js/bootstrap-datepicker.pt-BR.min.js'); ?>"></script>
 <!-- FIM DA CHAMADA DOS SCRIPTS JS!-->
 
 
