@@ -19,7 +19,7 @@ error_reporting(E_ALL);
 
 // Definir constantes
 define('DEFAULT_VIEW', 'Dashboard1');
-define('SYSTEM_CLASS_PATH', 'MVC/classes/system.class.php');
+define('SYSTEM_CLASS_PATH', 'MVC/CLASSES/system.class.php');
 define('ROOT_PATH', dirname(__FILE__));
 
 // Helper function for assets
