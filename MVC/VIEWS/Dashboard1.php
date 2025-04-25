@@ -346,6 +346,28 @@ $config = Config::getInstance();
         </div>
     </div>
 
+    <!-- QR Code Access Button -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Acesso Rápido</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <a href="<?php echo $config->url('?view=qr_codes'); ?>" class="btn btn-info btn-block">
+                                    <i class="fas fa-qrcode fa-2x"></i>
+                                    <span class="ml-2">QR Codes de Acesso</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Status das Mesas -->
     <div class="row mt-4">
         <div class="col-12">

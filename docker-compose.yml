@@ -1,68 +1,35 @@
-version: "3.7"
+version: '3.8'
 
 services:
-  divinosys:
-    image: php:8.0-apache
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
     volumes:
-      - divinosys_data:/var/www/html
-      - ./docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
-      - ./docker/apache/000-default.conf:/etc/apache2/sites-available/000-default.conf
-    networks:
-      - network_public
+      - .:/var/www/html
+    depends_on:
+      - db
     environment:
-      # Database Configuration
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_DATABASE=pdv_db
-      - DB_USERNAME=root
-      - DB_PASSWORD=122334Qw!!Conext
-      
-      # Application
-      - APP_NAME=DivinoSys
-      - APP_ENV=production
-      - APP_DEBUG=false
-      - APP_URL=https://divinosys.conext.click
-      
-      # PHP Configuration
-      - PHP_UPLOAD_MAX_FILESIZE=64M
-      - PHP_POST_MAX_SIZE=64M
-      - PHP_MEMORY_LIMIT=128M
-      
-      # Apache Configuration
-      - VIRTUAL_HOST=divinosys.conext.click
-      - APACHE_SERVER_NAME=divinosys.conext.click
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.middlewares.redirect-https.redirectscheme.scheme=https"
-        - "traefik.http.middlewares.redirect-https.redirectscheme.permanent=true"
-        - "traefik.http.routers.divinosys.rule=Host(`divinosys.conext.click`)"
-        - "traefik.http.routers.divinosys.entrypoints=websecure"
-        - "traefik.http.routers.divinosys.tls.certresolver=letsencryptresolver"
-        - "traefik.http.routers.divinosys-http.rule=Host(`divinosys.conext.click`)"
-        - "traefik.http.routers.divinosys-http.entrypoints=web"
-        - "traefik.http.routers.divinosys-http.middlewares=redirect-https@docker"
-        - "traefik.http.services.divinosys.loadbalancer.server.port=80"
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
-      update_config:
-        parallelism: 1
-        delay: 10s
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: divinosys
+      DB_USERNAME: divino
+      DB_PASSWORD: divino123
 
-networks:
-  network_public:
-    external: true
-    name: network_public
+  db:
+    image: mysql:8.0
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: divinosys
+      MYSQL_USER: divino
+      MYSQL_PASSWORD: divino123
+      MYSQL_ROOT_PASSWORD: root123
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./divinosys1.0.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
-  divinosys_data:
-    external: true
-    name: pdv_data
+  mysql_data: 

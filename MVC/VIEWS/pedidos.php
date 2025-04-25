@@ -79,22 +79,54 @@ foreach ($pedidos as $pedido) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        .pipeline-scroll-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Para melhor scroll no iOS */
+            scrollbar-width: thin; /* Para Firefox */
+            padding-bottom: 15px; /* Espaço para a scrollbar */
+        }
+
+        /* Estilização da scrollbar para Chrome/Safari */
+        .pipeline-scroll-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .pipeline-scroll-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .pipeline-scroll-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .pipeline-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
         .pipeline-container {
             display: flex;
             gap: 1rem;
             padding: 1rem;
+            min-width: max-content; /* Garante que as colunas não encolham */
         }
         
         .pipeline-column {
-            flex: 1;
-            min-width: 300px;
+            flex: 0 0 300px; /* Largura fixa de 300px, não encolhe nem cresce */
             margin: 0 10px;
             background-color: #f8f9fa;
             border-radius: 8px;
             padding: 10px;
+            max-height: calc(100vh - 200px); /* Altura máxima com scroll vertical */
+            overflow-y: auto;
         }
         
         .pipeline-header {
+            position: sticky;
+            top: 0;
+            z-index: 1;
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 6px;
@@ -320,121 +352,123 @@ foreach ($pedidos as $pedido) {
                 </div>
                 
         <!-- Pipeline de Pedidos -->
-        <div class="pipeline-container">
-            <?php foreach ($pedidos_por_status as $status => $pedidos_status): ?>
-                <div class="pipeline-column">
-                    <div class="pipeline-header <?php echo strtolower(str_replace(' ', '-', $status)); ?>-header">
-                        <h5 class="mb-0"><?php echo $status; ?></h5>
-                    </div>
-                    <?php foreach ($pedidos_status as $pedido_id => $dados): ?>
-                        <div class="pedido-card" onclick="togglePedido(this, event)">
-                            <div class="pedido-header">
-                                <div>
-                                    <h6 class="mb-0">
-                                        <?php if ($dados['pedido']['delivery']): ?>
-                                            <i class="fas fa-motorcycle me-1"></i>
-                                        <?php else: ?>
-                                            <i class="fas fa-utensils me-1"></i>
-                                            Mesa <?php echo $dados['pedido']['idmesa']; ?>
-                                        <?php endif; ?>
-                                        #<?php echo $pedido_id; ?>
-                                    </h6>
-                                    <small class="text-muted">
-                                        <?php echo date('d/m/Y H:i', strtotime($dados['pedido']['data'] . ' ' . $dados['pedido']['hora_pedido'])); ?>
-                                    </small>
-                                    <div class="valor-total-header">
-                                        R$ <?php echo number_format($dados['pedido']['valor_total'], 2, ',', '.'); ?>
+        <div class="pipeline-scroll-container">
+            <div class="pipeline-container">
+                <?php foreach ($pedidos_por_status as $status => $pedidos_status): ?>
+                    <div class="pipeline-column">
+                        <div class="pipeline-header <?php echo strtolower(str_replace(' ', '-', $status)); ?>-header">
+                            <h5 class="mb-0"><?php echo $status; ?></h5>
+                        </div>
+                        <?php foreach ($pedidos_status as $pedido_id => $dados): ?>
+                            <div class="pedido-card" onclick="togglePedido(this, event)">
+                                <div class="pedido-header">
+                                    <div>
+                                        <h6 class="mb-0">
+                                            <?php if ($dados['pedido']['delivery']): ?>
+                                                <i class="fas fa-motorcycle me-1"></i>
+                                            <?php else: ?>
+                                                <i class="fas fa-utensils me-1"></i>
+                                                Mesa <?php echo $dados['pedido']['idmesa']; ?>
+                                            <?php endif; ?>
+                                            #<?php echo $pedido_id; ?>
+                                        </h6>
+                                        <small class="text-muted">
+                                            <?php echo date('d/m/Y H:i', strtotime($dados['pedido']['data'] . ' ' . $dados['pedido']['hora_pedido'])); ?>
+                                        </small>
+                                        <div class="valor-total-header">
+                                            R$ <?php echo number_format($dados['pedido']['valor_total'], 2, ',', '.'); ?>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="pedido-content">
-                                <?php foreach ($dados['itens'] as $item): ?>
-                                    <div class="item-pedido">
-                                        <div class="produto-linha">
-                                            <div class="produto-info">
-                                                <span><?= htmlspecialchars($item['quantidade']) ?>x</span>
-                                                <span class="produto-nome">
-                                                    <?php 
-                                                    $nome_produto = $item['produto'];
-                                                    if (strpos($nome_produto, '(') === false && isset($item['pessoas']) && $item['pessoas'] > 0) {
-                                                        $nome_produto .= " ({$item['pessoas']} PESSOAS)";
-                                                    }
-                                                    echo htmlspecialchars($nome_produto);
-                                                    ?>
-                                                </span>
+                                <div class="pedido-content">
+                                    <?php foreach ($dados['itens'] as $item): ?>
+                                        <div class="item-pedido">
+                                            <div class="produto-linha">
+                                                <div class="produto-info">
+                                                    <span><?= htmlspecialchars($item['quantidade']) ?>x</span>
+                                                    <span class="produto-nome">
+                                                        <?php 
+                                                        $nome_produto = $item['produto'];
+                                                        if (strpos($nome_produto, '(') === false && isset($item['pessoas']) && $item['pessoas'] > 0) {
+                                                            $nome_produto .= " ({$item['pessoas']} PESSOAS)";
+                                                        }
+                                                        echo htmlspecialchars($nome_produto);
+                                                        ?>
+                                                    </span>
+                                                </div>
+                                                <span>R$ <?= number_format($item['valor_unitario'], 2, ',', '.') ?></span>
                                             </div>
-                                            <span>R$ <?= number_format($item['valor_unitario'], 2, ',', '.') ?></span>
+                                            
+                                            <?php if (!empty($item['ingredientes_sem']) || !empty($item['ingredientes_com']) || !empty($item['observacao'])) : ?>
+                                                <div class="ingredientes-container">
+                                                    <?php if (!empty($item['ingredientes_sem'])) : ?>
+                                                        <div class="ingredientes sem">
+                                                            <i class="fas fa-minus-circle"></i>
+                                                            <span>SEM: <?php echo htmlspecialchars($item['ingredientes_sem']); ?></span>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    
+                                                    <?php if (!empty($item['ingredientes_com'])) : ?>
+                                                        <div class="ingredientes com">
+                                                            <i class="fas fa-plus-circle"></i>
+                                                            <span>COM: <?php echo htmlspecialchars($item['ingredientes_com']); ?></span>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    
+                                                    <?php if (!empty($item['observacao'])) : ?>
+                                                        <div class="observacao">
+                                                            <i class="fas fa-info-circle"></i>
+                                                            <span>OBS: <?php echo htmlspecialchars($item['observacao']); ?></span>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
-                                        
-                                        <?php if (!empty($item['ingredientes_sem']) || !empty($item['ingredientes_com']) || !empty($item['observacao'])) : ?>
-                                            <div class="ingredientes-container">
-                                                <?php if (!empty($item['ingredientes_sem'])) : ?>
-                                                    <div class="ingredientes sem">
-                                                        <i class="fas fa-minus-circle"></i>
-                                                        <span>SEM: <?php echo htmlspecialchars($item['ingredientes_sem']); ?></span>
-                                                    </div>
-                                                <?php endif; ?>
-                                                
-                                                <?php if (!empty($item['ingredientes_com'])) : ?>
-                                                    <div class="ingredientes com">
-                                                        <i class="fas fa-plus-circle"></i>
-                                                        <span>COM: <?php echo htmlspecialchars($item['ingredientes_com']); ?></span>
-                                                    </div>
-                                                <?php endif; ?>
-                                                
-                                                <?php if (!empty($item['observacao'])) : ?>
-                                                    <div class="observacao">
-                                                        <i class="fas fa-info-circle"></i>
-                                                        <span>OBS: <?php echo htmlspecialchars($item['observacao']); ?></span>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                <?php endforeach; ?>
+                                    <?php endforeach; ?>
 
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <div class="btn-group">
-                                        <?php if ($status == 'Pendente'): ?>
-                                            <button class="btn btn-sm btn-info" onclick="atualizarStatus(<?php echo $pedido_id; ?>, 'Em Preparo')">
-                                                <i class="fas fa-utensils me-1"></i> Iniciar Preparo
-                                            </button>
-                                        <?php elseif ($status == 'Em Preparo'): ?>
-                                            <button class="btn btn-sm btn-success" onclick="atualizarStatus(<?php echo $pedido_id; ?>, 'Pronto')">
-                                                <i class="fas fa-check-circle me-1"></i> Marcar Pronto
-                                            </button>
-                                        <?php elseif ($status == 'Pronto'): ?>
-                                            <?php if ($dados['pedido']['delivery']): ?>
-                                                <button class="btn btn-sm btn-primary" onclick="atualizarStatus(<?php echo $pedido_id; ?>, 'Saiu para Entrega')">
-                                                    <i class="fas fa-motorcycle me-1"></i> Saiu para Entrega
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <div class="btn-group">
+                                            <?php if ($status == 'Pendente'): ?>
+                                                <button class="btn btn-sm btn-info" onclick="atualizarStatus(<?php echo $pedido_id; ?>, 'Em Preparo')">
+                                                    <i class="fas fa-utensils me-1"></i> Iniciar Preparo
                                                 </button>
-                                            <?php else: ?>
+                                            <?php elseif ($status == 'Em Preparo'): ?>
+                                                <button class="btn btn-sm btn-success" onclick="atualizarStatus(<?php echo $pedido_id; ?>, 'Pronto')">
+                                                    <i class="fas fa-check-circle me-1"></i> Marcar Pronto
+                                                </button>
+                                            <?php elseif ($status == 'Pronto'): ?>
+                                                <?php if ($dados['pedido']['delivery']): ?>
+                                                    <button class="btn btn-sm btn-primary" onclick="atualizarStatus(<?php echo $pedido_id; ?>, 'Saiu para Entrega')">
+                                                        <i class="fas fa-motorcycle me-1"></i> Saiu para Entrega
+                                                    </button>
+                                                <?php else: ?>
+                                                    <button class="btn btn-sm btn-success" onclick="atualizarStatus(<?php echo $pedido_id; ?>, 'Entregue')">
+                                                        <i class="fas fa-check me-1"></i> Entregar na Mesa
+                                                    </button>
+                                                <?php endif; ?>
+                                            <?php elseif ($status == 'Saiu para Entrega'): ?>
                                                 <button class="btn btn-sm btn-success" onclick="atualizarStatus(<?php echo $pedido_id; ?>, 'Entregue')">
-                                                    <i class="fas fa-check me-1"></i> Entregar na Mesa
+                                                    <i class="fas fa-check me-1"></i> Confirmar Entrega
                                                 </button>
                                             <?php endif; ?>
-                                        <?php elseif ($status == 'Saiu para Entrega'): ?>
-                                            <button class="btn btn-sm btn-success" onclick="atualizarStatus(<?php echo $pedido_id; ?>, 'Entregue')">
-                                                <i class="fas fa-check me-1"></i> Confirmar Entrega
-                                            </button>
-                                        <?php endif; ?>
 
-                                        <?php if (!in_array($status, ['Entregue (Mesa)', 'Entregue (Delivery)'])): ?>
-                                            <button class="btn btn-sm btn-danger ms-2" onclick="atualizarStatus(<?php echo $pedido_id; ?>, 'Cancelado')">
-                                                <i class="fas fa-times me-1"></i> Cancelar
-                                            </button>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="valor-total">
-                                        R$ <?php echo number_format($dados['pedido']['valor_total'], 2, ',', '.'); ?>
+                                            <?php if (!in_array($status, ['Entregue (Mesa)', 'Entregue (Delivery)'])): ?>
+                                                <button class="btn btn-sm btn-danger ms-2" onclick="atualizarStatus(<?php echo $pedido_id; ?>, 'Cancelado')">
+                                                    <i class="fas fa-times me-1"></i> Cancelar
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="valor-total">
+                                            R$ <?php echo number_format($dados['pedido']['valor_total'], 2, ',', '.'); ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
     </div>
 

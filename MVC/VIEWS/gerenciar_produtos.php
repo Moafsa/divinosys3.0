@@ -70,7 +70,7 @@ function escape($str) {
                                              class="img-thumbnail" 
                                              style="max-width: 50px;">
                                     <?php else: ?>
-                                        <img src="assets/img/no-image.png" 
+                                        <img src="assets/img/no-image.php" 
                                              alt="Sem imagem" 
                                              class="img-thumbnail" 
                                              style="max-width: 50px;">
@@ -262,12 +262,23 @@ function escape($str) {
 <script src="MVC/COMMON/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
 <script>
+var dataTable;
+
 $(document).ready(function() {
+    // Destroy existing DataTable if it exists
+    if (dataTable) {
+        dataTable.destroy();
+    }
+    
     // Initialize DataTable
-    $('#dataTable').DataTable({
+    dataTable = $('#dataTable').DataTable({
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json"
-        }
+        },
+        "pageLength": 10,
+        "ordering": true,
+        "searching": true,
+        "destroy": true
     });
 
     // Edit Product

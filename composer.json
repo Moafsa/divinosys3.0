@@ -1,0 +1,19 @@
+{
+    "name": "divino-lanches/divino-lanches-2.0",
+    "description": "Sistema de gerenciamento para o Divino Lanches",
+    "type": "project",
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "MVC/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Divino Lanches Team"
+        }
+    ],
+    "minimum-stability": "stable"
+} 

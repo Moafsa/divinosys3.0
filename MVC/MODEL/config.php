@@ -15,14 +15,14 @@ class Config {
         
         // Configurações do banco de dados
         $this->config['db'] = [
-            'host' => 'mysql',
-            'user' => 'root',
-            'pass' => '122334Qw!!Conext',
-            'name' => 'pdv_db'
+            'host' => 'db',
+            'user' => 'divino',
+            'pass' => 'divino123',
+            'name' => 'divinosys'
         ];
 
         // Configurações de URL
-$this->baseUrl = $this->detectBaseUrl();
+        $this->baseUrl = $this->detectBaseUrl();
         $this->config['assets_url'] = rtrim($this->baseUrl, '/') . '/assets';
         
         // Log para debug

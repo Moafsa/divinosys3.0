@@ -1,20 +1,50 @@
 (function($) {
   "use strict"; // Start of use strict
 
+  // Check if we're on mobile
+  var isMobile = function() {
+    return $(window).width() < 768;
+  };
+
+  // Function to handle sidebar state
+  var handleSidebarState = function() {
+    if (isMobile()) {
+      $(".sidebar").addClass("toggled");
+      $("body").addClass("sidebar-toggled");
+      $('.sidebar .collapse').collapse('hide');
+    }
+  };
+
+  // Initial state check
+  handleSidebarState();
+
   // Toggle the side navigation
   $("#sidebarToggle, #sidebarToggleTop").on('click', function(e) {
+    e.preventDefault();
     $("body").toggleClass("sidebar-toggled");
     $(".sidebar").toggleClass("toggled");
+    
+    // Store the state in localStorage
+    localStorage.setItem('sidebarToggled', $(".sidebar").hasClass("toggled"));
+
     if ($(".sidebar").hasClass("toggled")) {
       $('.sidebar .collapse').collapse('hide');
-    };
+    }
   });
 
-  // Close any open menu accordions when window is resized below 768px
+  // Handle window resize
   $(window).resize(function() {
-    if ($(window).width() < 768) {
+    handleSidebarState();
+  });
+
+  // Restore sidebar state from localStorage on page load
+  $(document).ready(function() {
+    var sidebarState = localStorage.getItem('sidebarToggled');
+    if (sidebarState === 'true' || isMobile()) {
+      $(".sidebar").addClass("toggled");
+      $("body").addClass("sidebar-toggled");
       $('.sidebar .collapse').collapse('hide');
-    };
+    }
   });
 
   // Prevent the content wrapper from scrolling when the fixed side navigation hovered over

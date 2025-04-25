@@ -1,24 +1,11 @@
+# Dependencies
+/vendor/
+/node_modules/
+
 # Environment files
 .env
 .env.*
 !.env.example
-
-# Logs
-*.log
-php_errors.log
-error.log
-cadastro_admin.log
-
-# Docker
-docker-compose.override.yml
-
-# Uploads directory
-uploads/*
-!uploads/.gitkeep
-
-# Dependencies
-vendor/
-node_modules/
 
 # IDE files
 .idea/
@@ -28,4 +15,34 @@ node_modules/
 
 # OS files
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Build files
+/dist/
+/build/
+
+# Cache
+*.cache
+
+# Uploads directory
+/uploads/*
+!/uploads/.gitkeep
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+php_errors.log
+error.log
+cadastro_admin.log 

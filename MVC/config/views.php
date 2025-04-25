@@ -25,6 +25,7 @@ return [
     'cards',
     'persistir_fechamento',
     'relatorios',
+    'qr_codes',
     
     // Views de impressão (sem layout)
     'imprimir_pedido',

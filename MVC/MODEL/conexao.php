@@ -25,9 +25,9 @@ date_default_timezone_set('America/Sao_Paulo');
 
 // Database connection settings
 $servidor = "db"; // Docker service name from docker-compose.yml
-$usuario = "pdv";
-$senha = "pdv123";
-$dbname = "pdv";
+$usuario = "divino";
+$senha = "divino123";
+$dbname = "divinosys";
 
 // Debug: Print environment variables
 error_log("=== DEBUG: Variáveis de Ambiente ===");
