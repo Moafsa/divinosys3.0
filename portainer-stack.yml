@@ -9,7 +9,7 @@ services:
       - network_public
     environment:
       # Database Configuration
-      - DB_HOST=mysql.network_public
+      - DB_HOST=mysql
       - DB_PORT=3306
       - DB_DATABASE=pdv_db
       - DB_USERNAME=root

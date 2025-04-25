@@ -34,7 +34,7 @@ if ($login == null) {?>
     <link href="MVC/COMMON/CSS/bootstrap-datepicker.css" rel="stylesheet"/>
     <link href="MVC/COMMON/VENDOR/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="MVC/COMMON/CSS/sb-admin-2.min.css" rel="stylesheet">
-    <link rel="shortcut icon" href="MVC/COMMON/IMG/beer.png">
+    <link rel="shortcut icon" href="MVC/COMMON/img/beer.png">
 
     <style>
       body {

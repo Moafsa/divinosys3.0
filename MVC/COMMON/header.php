@@ -24,7 +24,7 @@ $usuario = isset($_SESSION['nome']) ? $_SESSION['nome'] : (isset($_SESSION['user
   <link href="<?php echo url('MVC/COMMON/CSS/animate.min.css'); ?>" rel="stylesheet"/><!--ESTE COMANDO CRIA A NOTIFICAÇÃO ANIMADA  -->
   <link href="<?php echo url('MVC/COMMON/CSS/bootstrap-datepicker.css'); ?>" rel="stylesheet"/>
 
-  <link rel="shortcut icon"  href="<?php echo url('MVC/COMMON/IMG/beer.png'); ?>"><!--este comando muda o icone da janela-->
+  <link rel="shortcut icon"  href="<?php echo url('MVC/COMMON/img/beer.png'); ?>"><!--este comando muda o icone da janela-->
 
   <!-- Custom fonts for this template-->
   <link href="<?php echo url('MVC/COMMON/VENDOR/fontawesome-free/css/all.min.css'); ?>" rel="stylesheet" type="text/css">
@@ -218,7 +218,7 @@ $usuario = isset($_SESSION['nome']) ? $_SESSION['nome'] : (isset($_SESSION['user
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <img class="img-profile rounded-circle" src="mvc/common/img/User.png">
+        <img class="img-profile rounded-circle" src="MVC/COMMON/img/User.png">
                 <label style="width: 15px;"></label>
                 <span class="text-center" style=" font-size: 25px; color: #888888;"><b><?php echo $usuario; ?></b></span>
                 
