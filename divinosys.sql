@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db:3306
--- Tempo de geração: 26/04/2025 às 21:27
+-- Tempo de geração: 26/04/2025 às 22:07
 -- Versão do servidor: 8.0.42
 -- Versão do PHP: 8.2.27
 
@@ -145,22 +145,22 @@ CREATE TABLE `clientes` (
   `id` int NOT NULL,
   `nome` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
   `endereco` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `bairro` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `cidade` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `estado` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `complemento` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `cep` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `ponto_referencia` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
-  `tel1` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `tel2` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `email` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `cpf_cnpj` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `rg` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `condominio` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `bloco` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `apartamento` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `local_entrega` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `observacoes` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL
+  `bairro` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
+  `cidade` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
+  `estado` varchar(50) COLLATE utf8mb3_bin DEFAULT NULL,
+  `complemento` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
+  `cep` varchar(20) COLLATE utf8mb3_bin DEFAULT NULL,
+  `ponto_referencia` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
+  `tel1` varchar(20) COLLATE utf8mb3_bin DEFAULT NULL,
+  `tel2` varchar(20) COLLATE utf8mb3_bin DEFAULT NULL,
+  `email` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
+  `cpf_cnpj` varchar(30) COLLATE utf8mb3_bin DEFAULT NULL,
+  `rg` varchar(30) COLLATE utf8mb3_bin DEFAULT NULL,
+  `condominio` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
+  `bloco` varchar(50) COLLATE utf8mb3_bin DEFAULT NULL,
+  `apartamento` varchar(50) COLLATE utf8mb3_bin DEFAULT NULL,
+  `local_entrega` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
+  `observacoes` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
@@ -168,7 +168,7 @@ CREATE TABLE `clientes` (
 --
 
 INSERT INTO `clientes` (`id`, `nome`, `endereco`, `bairro`, `cidade`, `estado`, `complemento`, `cep`, `ponto_referencia`, `tel1`, `tel2`, `email`, `cpf_cnpj`, `rg`, `condominio`, `bloco`, `apartamento`, `local_entrega`, `observacoes`) VALUES
-(2, 'Moacir', 'Rua joao', '', '', '', '', '', 'Concretos', '54998887221', '', '', '', '', '', '', '', '', '');
+(3, '', '', NULL, NULL, NULL, NULL, NULL, '', '54997092223', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -454,10 +454,10 @@ INSERT INTO `pedido` (`idpedido`, `idmesa`, `cliente`, `delivery`, `endereco_ent
 (50, 11, NULL, 0, NULL, NULL, NULL, '2025-04-24', '16:11:22', NULL, NULL, 'Cancelado', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
 (51, 10, NULL, 0, NULL, NULL, NULL, '2025-04-24', '16:22:29', NULL, NULL, 'Finalizado', 74.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
 (52, 12, NULL, 0, NULL, NULL, NULL, '2025-04-24', '17:13:02', NULL, NULL, 'Finalizado', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(53, 0, '', 1, '', '', '54998887221', '2025-04-24', '17:39:10', NULL, NULL, 'Entregue', 0.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', 2),
-(54, 0, 'Moacir', 1, 'Rua joao', 'Concretos', '54998887221', '2025-04-24', '17:45:23', NULL, NULL, 'Pendente', 115.00, 10.00, 'Cartão - Débito', 0.00, NULL, NULL, NULL, 'mesa', 2),
-(55, 0, 'Moacir', 1, 'Rua joao', 'Concretos', '54998887221', '2025-04-24', '18:00:37', NULL, NULL, 'Pendente', 120.00, 10.00, 'Cartão - Crédito', 0.00, NULL, NULL, NULL, 'mesa', 2),
-(56, 0, '', 1, '', '', '54998887221', '2025-04-24', '18:25:32', NULL, NULL, 'Pendente', 100.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', 2),
+(53, 0, '', 1, '', '', '54998887221', '2025-04-24', '17:39:10', NULL, NULL, 'Entregue', 0.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
+(54, 0, 'Moacir', 1, 'Rua joao', 'Concretos', '54998887221', '2025-04-24', '17:45:23', NULL, NULL, 'Pendente', 115.00, 10.00, 'Cartão - Débito', 0.00, NULL, NULL, NULL, 'mesa', NULL),
+(55, 0, 'Moacir', 1, 'Rua joao', 'Concretos', '54998887221', '2025-04-24', '18:00:37', NULL, NULL, 'Pendente', 120.00, 10.00, 'Cartão - Crédito', 0.00, NULL, NULL, NULL, 'mesa', NULL),
+(56, 0, '', 1, '', '', '54998887221', '2025-04-24', '18:25:32', NULL, NULL, 'Pendente', 100.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
 (57, NULL, 'Moacir', 1, '', '', '', '2025-04-26', '13:02:47', NULL, NULL, 'Cancelado', 100.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
 (58, 25, NULL, 0, NULL, NULL, NULL, '2025-04-26', '14:43:18', NULL, NULL, 'Finalizado', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
 (59, 10, NULL, 0, NULL, NULL, NULL, '2025-04-26', '15:18:50', NULL, NULL, 'Finalizado', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
@@ -474,7 +474,9 @@ INSERT INTO `pedido` (`idpedido`, `idmesa`, `cliente`, `delivery`, `endereco_ent
 (70, 2, NULL, 0, NULL, NULL, NULL, '2025-04-26', '17:29:16', NULL, NULL, 'Entregue', 6.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
 (71, 15, NULL, 0, NULL, NULL, NULL, '2025-04-26', '17:39:05', NULL, NULL, 'Cancelado', 28.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
 (72, NULL, 'chaiane', 1, '', '', '', '2025-04-26', '17:46:08', NULL, NULL, 'Entregue', 46.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
-(73, 2, NULL, 0, NULL, NULL, NULL, '2025-04-26', '17:47:39', NULL, NULL, 'Pendente', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL);
+(73, 2, NULL, 0, NULL, NULL, NULL, '2025-04-26', '17:47:39', NULL, NULL, 'Pendente', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
+(74, NULL, '', 1, '', '', '54998887221', '2025-04-26', '19:02:53', NULL, NULL, 'Pendente', 100.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
+(75, NULL, '', 1, '', '', '54997092223', '2025-04-26', '19:06:21', NULL, NULL, 'Pendente', 110.00, 10.00, '', 0.00, NULL, NULL, NULL, 'mesa', 3);
 
 -- --------------------------------------------------------
 
@@ -580,7 +582,9 @@ INSERT INTO `pedido_itens` (`id`, `pedido_id`, `produto_id`, `quantidade`, `valo
 (109, 70, 51, 1, 6.00, 6.00, '', NULL, NULL),
 (111, 72, 35, 1, 40.00, 40.00, '', NULL, NULL),
 (112, 72, 51, 1, 6.00, 6.00, '', NULL, NULL),
-(113, 73, 27, 1, 100.00, 100.00, '', NULL, NULL);
+(113, 73, 27, 1, 100.00, 100.00, '', NULL, NULL),
+(114, 74, 27, 1, 100.00, 100.00, '', NULL, NULL),
+(115, 75, 27, 1, 100.00, 100.00, '', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1133,7 +1137,7 @@ ALTER TABLE `categorias`
 -- AUTO_INCREMENT de tabela `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `despesas`
@@ -1175,7 +1179,7 @@ ALTER TABLE `mesas`
 -- AUTO_INCREMENT de tabela `pedido`
 --
 ALTER TABLE `pedido`
-  MODIFY `idpedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
+  MODIFY `idpedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
 
 --
 -- AUTO_INCREMENT de tabela `pedido_item_ingredientes`
@@ -1187,7 +1191,7 @@ ALTER TABLE `pedido_item_ingredientes`
 -- AUTO_INCREMENT de tabela `pedido_itens`
 --
 ALTER TABLE `pedido_itens`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=116;
 
 --
 -- AUTO_INCREMENT de tabela `perfil_estabelecimento`
