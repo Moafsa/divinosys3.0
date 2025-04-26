@@ -1,261 +1,91 @@
 <?php
-// O arquivo init.php já foi incluído pelo System.class.php
-// Então não precisamos incluir config.php ou conexao.php novamente
-
-// Adicionar botão de novo pedido no topo
+include_once(__DIR__ . '/../MODEL/conexao.php');
+$status_options = ['Todos', 'Pendente', 'Em Preparo', 'Saiu para Entrega', 'Entregue', 'Cancelado'];
+$selected_status = isset($_GET['status']) ? $_GET['status'] : 'Todos';
 ?>
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12 text-end">
-            <a href="<?php echo $config->url('?view=gerar_pedido_delivery'); ?>" class="btn btn-success">
+            <a href="?view=gerar_pedido_delivery" class="btn btn-success">
                 <i class="fas fa-plus-circle"></i> Novo Pedido Delivery
             </a>
         </div>
     </div>
-</div>
-
-<?php
-// Verificar se há pesquisa
-if(isset($_POST['pesquisa']) && $_POST['pesquisa'] != '') {
-	try {
-		$pesquisa = mysqli_real_escape_string($conn, $_POST['pesquisa']);
-		$stmt = mysqli_prepare($conn, "SELECT * FROM clientes WHERE nome LIKE ? OR cpf_cnpj LIKE ?");
-		$search_term = "%{$pesquisa}%";
-		mysqli_stmt_bind_param($stmt, "ss", $search_term, $search_term);
-		
-		if (!mysqli_stmt_execute($stmt)) {
-			throw new Exception("Erro ao executar consulta: " . mysqli_stmt_error($stmt));
-		}
-		
-		$clientes = mysqli_stmt_get_result($stmt);
-		
-		if (!$clientes) {
-			throw new Exception("Erro ao obter resultados: " . mysqli_error($conn));
-		}
-?>
-		<div class="container-fluid">
-			<table class="table table-striped table-sm">
-				<thead>
-					<tr>
-						<th>Nome</th>
-						<th>Endereço</th>
-						<th>Bairro</th>
-						<th>Cidade</th>
-						<th>Estado</th>
-						<th>Telefone#1</th>
-						<th>Telefone#2</th>
-						<th>E-Mail</th>
-						<th>Seleção</th>
-					</tr>
-				</thead>
-
-<?php
-
-				while($rows_clientes = mysqli_fetch_assoc($clientes)){ ?>
-
-
-
-				<tbody>
-					<td><?php echo htmlspecialchars($rows_clientes['nome'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['endereco'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['bairro'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['cidade'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['estado'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['tel1'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['tel2'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['email'], ENT_QUOTES, 'UTF-8');?></td>
-					<td>
-						<form method="POST" action="<?php echo $config->url('?view=delivery'); ?>">
-							<input type="hidden" name="id" value="<?php echo $rows_clientes['id'];?>">
-							<input type="hidden" name="nome" value="<?php echo htmlspecialchars($rows_clientes['nome'], ENT_QUOTES, 'UTF-8');?>">
-							<input type="hidden" name="endereco" value="<?php echo htmlspecialchars($rows_clientes['endereco'], ENT_QUOTES, 'UTF-8');?>">
-							<input type="hidden" name="bairro" value="<?php echo htmlspecialchars($rows_clientes['bairro'], ENT_QUOTES, 'UTF-8');?>">
-							<input type="hidden" name="tel1" value="<?php echo htmlspecialchars($rows_clientes['tel1'], ENT_QUOTES, 'UTF-8');?>">
-							<input type="hidden" name="tel2" value="<?php echo htmlspecialchars($rows_clientes['tel2'], ENT_QUOTES, 'UTF-8');?>">
-							<button type="submit" class="btn btn-outline-danger btn-sm">Selecionar</button>
-						</form>
-					</td>
-				</tbody>
-
-<?php }?>
-			</table>
-		</div>
-<?php
-		mysqli_stmt_close($stmt);
-	} catch (Exception $e) {
-		error_log("Erro na página de delivery: " . $e->getMessage());
-		$_SESSION['msg'] = "<div class='alert alert-danger'>Erro ao carregar clientes: " . htmlspecialchars($e->getMessage()) . "</div>";
-	}
-} elseif(isset($_POST['id'])) {
-	$id = $_POST['id'];
-	$nome = $_POST['nome'];
-	$endereco = $_POST['endereco'];
-	$bairro = $_POST['bairro'];
-	$tel1 = $_POST['tel1'];
-	$tel2 = $_POST['tel2'];
-?>
-<div class="row">
-
-	<div class="col-lg-12 text-center" style="color:black; padding: 3%;">
-		<hr>
-		
-		<h2><?php echo htmlspecialchars($nome); ?></h2>
-	</div>
-	
-	<div class="col-lg-12 text-center" style=" color: red;">
-		<h5>Endereço:</h5>
-		<h2><?php echo htmlspecialchars($endereco); ?>, Bairro: <?php echo htmlspecialchars($bairro); ?></h2>
-	</div>
-
-</div>
-<hr>
-
-<h4 style="padding: 3%;" class="mb-12 text-center" ><button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#Modal_categorias" >Novo Pedido Delivery</button></h4>
-
-<div class="col-lg-12 text-center">
-
-
-<a href="<?php echo $config->url('?view=delivery'); ?>" class="btn btn-outline-info col-lg-2 text-center" style="padding: 5px;">Retornar ao Início</a>
-
-</div>
-
-
-<?php
-} else {
-	try {
-		$stmt = mysqli_prepare($conn, "SELECT * FROM clientes");
-		
-		if (!mysqli_stmt_execute($stmt)) {
-			throw new Exception("Erro ao executar consulta: " . mysqli_stmt_error($stmt));
-		}
-		
-		$clientes = mysqli_stmt_get_result($stmt);
-		
-		if (!$clientes) {
-			throw new Exception("Erro ao obter resultados: " . mysqli_error($conn));
-		}
-?>
-
-		<div class="container-fluid">
-			<table class="table table-striped table-sm">
-				<thead>
-					<tr>
-						<th>Nome</th>
-						<th>Endereço</th>
-						<th>Bairro</th>
-						<th>Cidade</th>
-						<th>Estado</th>
-						<th>Telefone#1</th>
-						<th>Telefone#2</th>
-						<th>E-Mail</th>
-						<th>Seleção</th>
-					</tr>
-				</thead>
-
-<?php
-
-				while($rows_clientes = mysqli_fetch_assoc($clientes)){ ?>
-
-
-
-
-				<tbody>
-					<td><?php echo htmlspecialchars($rows_clientes['nome'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['endereco'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['bairro'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['cidade'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['estado'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['tel1'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['tel2'], ENT_QUOTES, 'UTF-8');?></td>
-					<td><?php echo htmlspecialchars($rows_clientes['email'], ENT_QUOTES, 'UTF-8');?></td>
-					<td>
-						<form method="POST" action="<?php echo $config->url('?view=delivery'); ?>">
-							<input type="hidden" name="id" value="<?php echo $rows_clientes['id'];?>">
-							<input type="hidden" name="nome" value="<?php echo htmlspecialchars($rows_clientes['nome'], ENT_QUOTES, 'UTF-8');?>">
-							<input type="hidden" name="endereco" value="<?php echo htmlspecialchars($rows_clientes['endereco'], ENT_QUOTES, 'UTF-8');?>">
-							<input type="hidden" name="bairro" value="<?php echo htmlspecialchars($rows_clientes['bairro'], ENT_QUOTES, 'UTF-8');?>">
-							<input type="hidden" name="tel1" value="<?php echo htmlspecialchars($rows_clientes['tel1'], ENT_QUOTES, 'UTF-8');?>">
-							<input type="hidden" name="tel2" value="<?php echo htmlspecialchars($rows_clientes['tel2'], ENT_QUOTES, 'UTF-8');?>">
-							<button type="submit" class="btn btn-outline-danger btn-sm">Selecionar</button>
-						</form>
-					</td>
-				</tbody>
-
-<?php }
-
-?>
-
-
-			</table>
-		</div>
-
-<?php
-		mysqli_stmt_close($stmt);
-	} catch (Exception $e) {
-		error_log("Erro na página de delivery: " . $e->getMessage());
-		$_SESSION['msg'] = "<div class='alert alert-danger'>Erro ao carregar clientes: " . htmlspecialchars($e->getMessage()) . "</div>";
-	}
-}
-?>
-
-
-<!-- Modal CATEGORIAS-->
-<div class="modal fade bd-example-modal-lg" id="Modal_categorias" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle" style="color: black;">Categorias</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" style="background: black;">
-
-        
-		<div class="container-fluid " >
-			
-			<div class="row" >
-				
-				
-				<?php
-
-				$tab_produtos = "SELECT * FROM produtos";
-
-				$produtos = mysqli_query($conn, $tab_produtos);
-
-				$comparativo = array();
-				while ($cat = mysqli_fetch_assoc($produtos)) {
-					
-					$categoria = $cat['categoria'];
-
-					if (in_array("$categoria", $comparativo) != true) {
-					 	array_push($comparativo, $categoria);
-						?>
-							
-							<form method="POST" action="<?php echo $config->url('?view=novo_pedido'); ?>">
-							<div class="form-group" >
-								<input type="hidden" name="pesquisa" id="pesquisa" value=" ">
-								<input type="hidden" name="mesa" id="mesa" value="delivery">
-								<input type="hidden" name="cliente" id="cliente" value="<?php echo htmlspecialchars($nome); ?>">
-								<input type="submit" class="btn btn-outline-warning" name="categoria" value="<?php echo htmlspecialchars($categoria); ?>" ></input><label type="hidden" style="width: 10px;"></label>
-								
-							</div>
-							</form>
-							
-
-					<?php 
-					} 
-				}; 
-
-				?>
-				</div>
-			</div>
-		</div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
-        
-      </div>
+    <form method="get" action="" class="row g-2 align-items-center mb-3" onsubmit="this.action='?view=delivery&status='+document.getElementById('status').value;">
+        <input type="hidden" name="view" value="delivery">
+        <div class="col-auto">
+            <label for="status" class="form-label mb-0">Filtrar por status:</label>
+        </div>
+        <div class="col-auto">
+            <select name="status" id="status" class="form-select" onchange="this.form.submit()">
+                <?php foreach ($status_options as $opt): ?>
+                    <option value="<?php echo $opt; ?>" <?php if ($selected_status == $opt) echo 'selected'; ?>><?php echo $opt; ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    </form>
+    <div id="delivery-list">
+        <?php
+        $where = "(p.tipo = 'delivery' OR p.endereco_entrega IS NOT NULL)";
+        if ($selected_status && $selected_status != 'Todos') {
+            $where .= " AND p.status = '" . mysqli_real_escape_string($conn, $selected_status) . "'";
+        }
+        $sql = "SELECT p.*, c.nome as cliente_nome, c.tel1 as cliente_tel, c.endereco as cliente_endereco, c.bairro as cliente_bairro, c.cidade as cliente_cidade, c.estado as cliente_estado
+                FROM pedido p
+                LEFT JOIN clientes c ON p.cliente_id = c.id
+                WHERE $where
+                ORDER BY p.data DESC, p.hora_pedido DESC";
+        $result = mysqli_query($conn, $sql);
+        if ($result && mysqli_num_rows($result) > 0) {
+            echo '<div class="container-fluid mb-4"><h3>Pedidos Delivery</h3>';
+            echo '<div class="row">';
+            while ($pedido = mysqli_fetch_assoc($result)) {
+                echo '<div class="col-md-6 col-lg-4 mb-3">';
+                echo '<div class="card shadow">';
+                echo '<div class="card-body">';
+                echo '<h5 class="card-title">Pedido #'.$pedido['idpedido'].' <span class="badge bg-info">'.htmlspecialchars($pedido['status']).'</span></h5>';
+                echo '<p><strong>Cliente:</strong> '.htmlspecialchars($pedido['cliente_nome'] ?? $pedido['nome_cliente'] ?? '-').'</p>';
+                echo '<p><strong>Telefone:</strong> '.htmlspecialchars($pedido['cliente_tel'] ?? $pedido['telefone'] ?? '-').'</p>';
+                echo '<p><strong>Endereço:</strong> '.htmlspecialchars($pedido['endereco_entrega'] ?? $pedido['cliente_endereco'] ?? '-');
+                if (!empty($pedido['cliente_bairro'])) echo ', Bairro: '.htmlspecialchars($pedido['cliente_bairro']);
+                if (!empty($pedido['cliente_cidade'])) echo ', '.htmlspecialchars($pedido['cliente_cidade']);
+                if (!empty($pedido['cliente_estado'])) echo ' - '.htmlspecialchars($pedido['cliente_estado']);
+                echo '</p>';
+                if (!empty($pedido['ponto_referencia'])) echo '<p><strong>Referência:</strong> '.htmlspecialchars($pedido['ponto_referencia']).'</p>';
+                if (!empty($pedido['taxa_entrega'])) echo '<p><strong>Taxa de Entrega:</strong> R$ '.number_format($pedido['taxa_entrega'],2,',','.').'</p>';
+                if (!empty($pedido['forma_pagamento'])) echo '<p><strong>Pagamento:</strong> '.htmlspecialchars($pedido['forma_pagamento']);
+                if (!empty($pedido['troco_para'])) echo ' (Troco para R$ '.number_format($pedido['troco_para'],2,',','.').')';
+                echo '</p>';
+                echo '<p><strong>Valor Total:</strong> R$ '.number_format($pedido['valor_total'],2,',','.').'</p>';
+                echo '<p><strong>Data/Hora:</strong> '.htmlspecialchars($pedido['data']).' '.htmlspecialchars($pedido['hora_pedido']).'</p>';
+                if ($pedido['status'] != 'Entregue' && $pedido['status'] != 'Finalizado' && $pedido['status'] != 'Cancelado') {
+                    echo '<button class="btn btn-success btn-sm mt-2 w-100" onclick="marcarEntregue('.$pedido['idpedido'].')"><i class="fas fa-check"></i> Marcar como Entregue</button>';
+                }
+                echo '</div></div></div>';
+            }
+            echo '</div></div>';
+        } else {
+            echo '<div class="container-fluid mb-4"><h5>Nenhum pedido de delivery encontrado.</h5></div>';
+        }
+        ?>
     </div>
-  </div>
 </div>
+<script>
+function marcarEntregue(pedidoId) {
+    if (!confirm('Marcar pedido como Entregue?')) return;
+    fetch('MVC/MODEL/atualizar_status_pedido.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `pedido_id=${pedidoId}&status=Entregue`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Erro ao atualizar status: ' + (data.message || 'Erro desconhecido'));
+        }
+    })
+    .catch(() => alert('Erro ao atualizar status.'));
+}
+</script>

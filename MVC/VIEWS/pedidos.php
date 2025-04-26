@@ -67,6 +67,16 @@ foreach ($pedidos as $pedido) {
         $pedidos_por_status[$status][$pedido['idpedido']]['itens'][] = $pedido;
     }
 }
+
+// Ordenar os pedidos por número da mesa dentro de cada status
+foreach ($pedidos_por_status as $status => &$pedidos_status) {
+    uasort($pedidos_status, function($a, $b) {
+        $mesaA = isset($a['pedido']['idmesa']) ? (int)$a['pedido']['idmesa'] : 0;
+        $mesaB = isset($b['pedido']['idmesa']) ? (int)$b['pedido']['idmesa'] : 0;
+        return $mesaA <=> $mesaB;
+    });
+}
+unset($pedidos_status);
 ?>
 
 <!DOCTYPE html>
@@ -150,11 +160,13 @@ foreach ($pedidos as $pedido) {
         }
 
         .entregue-mesa-header {
-            background-color: #6f42c1;
+            background-color: #4B2991 !important;
+            color: #fff !important;
         }
 
         .entregue-delivery-header {
-            background-color: #20c997;
+            background-color: #1B5E20 !important;
+            color: #fff !important;
         }
         
         .pedido-card {
@@ -315,6 +327,31 @@ foreach ($pedidos as $pedido) {
             font-weight: bold;
             color: #28a745;
         }
+
+        .tempo-decorrido {
+            font-size: 1.2em;
+            font-weight: bold;
+            background: #fff0f0 !important;
+            color: #d32f2f !important;
+            border: 1px solid #d32f2f;
+            padding: 2px 10px;
+            border-radius: 8px;
+            margin-left: 8px;
+        }
+
+        /* Força o contraste dos cabeçalhos das pipelines entregues */
+        .pipeline-header.entregue-mesa-header, .pipeline-header.entregue-delivery-header {
+            background-color: #4B2991 !important;
+            color: #fff !important;
+        }
+        .pipeline-header.entregue-delivery-header {
+            background-color: #1B5E20 !important;
+        }
+        .pipeline-header h5 {
+            color: #fff !important;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #00000033;
+        }
     </style>
 </head>
 <body>
@@ -355,9 +392,19 @@ foreach ($pedidos as $pedido) {
         <div class="pipeline-scroll-container">
             <div class="pipeline-container">
                 <?php foreach ($pedidos_por_status as $status => $pedidos_status): ?>
+                    <?php
+                    $headerStyle = '';
+                    if ($status === 'Entregue (Mesa)') {
+                        $headerStyle = 'background-color: #4B2991; color: #fff;';
+                    } elseif ($status === 'Entregue (Delivery)') {
+                        $headerStyle = 'background-color: #1B5E20; color: #fff;';
+                    }
+                    ?>
                     <div class="pipeline-column">
-                        <div class="pipeline-header <?php echo strtolower(str_replace(' ', '-', $status)); ?>-header">
-                            <h5 class="mb-0"><?php echo $status; ?></h5>
+                        <div class="pipeline-header <?php echo strtolower(str_replace(' ', '-', $status)); ?>-header" style="<?php echo $headerStyle; ?>">
+                            <h5 class="mb-0" style="color: #fff; text-shadow: 1px 1px 2px #00000033;">
+                                <?php echo $status; ?>
+                            </h5>
                         </div>
                         <?php foreach ($pedidos_status as $pedido_id => $dados): ?>
                             <div class="pedido-card" onclick="togglePedido(this, event)">
@@ -373,7 +420,9 @@ foreach ($pedidos as $pedido) {
                                             #<?php echo $pedido_id; ?>
                                         </h6>
                                         <small class="text-muted">
-                                            <?php echo date('d/m/Y H:i', strtotime($dados['pedido']['data'] . ' ' . $dados['pedido']['hora_pedido'])); ?>
+                                            <?php $dataHoraPedido = $dados['pedido']['data'] . ' ' . $dados['pedido']['hora_pedido']; ?>
+                                            <?php echo date('d/m/Y H:i', strtotime($dataHoraPedido)); ?>
+                                            <span class="badge bg-secondary ms-2 tempo-decorrido" data-hora-pedido="<?php echo $dataHoraPedido; ?>" id="tempo-decorrido-<?php echo $pedido_id; ?>">00:00:00</span>
                                         </small>
                                         <div class="valor-total-header">
                                             R$ <?php echo number_format($dados['pedido']['valor_total'], 2, ',', '.'); ?>
@@ -512,10 +561,37 @@ foreach ($pedidos as $pedido) {
             });
         }
 
-        // Atualiza a página a cada 30 segundos
-        setInterval(function() {
-            window.location.reload();
-        }, 30000);
+        function atualizarTemposDecorridos() {
+            var agora = new Date();
+            document.querySelectorAll('.tempo-decorrido').forEach(function(span) {
+                var card = span.closest('.pipeline-column');
+                var header = card ? card.querySelector('.pipeline-header h5') : null;
+                var status = header ? header.textContent.trim() : '';
+                var dataHora = span.getAttribute('data-hora-pedido');
+                var dataPedido = new Date(dataHora.replace(' ', 'T'));
+                var diff = Math.floor((agora - dataPedido) / 1000); // diferença em segundos
+                if (diff < 0) diff = 0;
+                var horas = Math.floor(diff / 3600);
+                var minutos = Math.floor((diff % 3600) / 60);
+                var segundos = diff % 60;
+                var tempoFinal =
+                    (horas < 10 ? '0' : '') + horas + ':' +
+                    (minutos < 10 ? '0' : '') + minutos + ':' +
+                    (segundos < 10 ? '0' : '') + segundos;
+                if (status === 'Entregue (Mesa)' || status === 'Entregue (Delivery)') {
+                    // Travar o cronômetro no tempo final
+                    if (!span.dataset.travado) {
+                        span.textContent = tempoFinal;
+                        span.dataset.travado = '1';
+                    }
+                    return;
+                }
+                span.textContent = tempoFinal;
+                span.dataset.travado = '';
+            });
+        }
+        setInterval(atualizarTemposDecorridos, 1000);
+        document.addEventListener('DOMContentLoaded', atualizarTemposDecorridos);
     </script>
 </body>
 </html> 

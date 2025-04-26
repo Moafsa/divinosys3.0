@@ -170,37 +170,37 @@ $clientes = mysqli_query($conn, $tab_clientes);
           		?>
             <tr>
             	<td><?php echo $num?></td>
-            	<td><?php echo htmlspecialchars($rows_clientes['nome'], ENT_QUOTES, 'UTF-8'); ?></td>
-            	<td><?php echo htmlspecialchars($rows_clientes['endereco'], ENT_QUOTES, 'UTF-8'); ?></td>
-            	<td><?php echo htmlspecialchars($rows_clientes['bairro'], ENT_QUOTES, 'UTF-8'); ?></td>
-            	<td><?php echo htmlspecialchars($rows_clientes['cidade'], ENT_QUOTES, 'UTF-8'); ?></td>
-            	<td><?php echo htmlspecialchars($rows_clientes['cep'], ENT_QUOTES, 'UTF-8'); ?></td>
-            	<td><?php echo htmlspecialchars($rows_clientes['tel1'], ENT_QUOTES, 'UTF-8'); ?></td>
-            	<td><?php echo htmlspecialchars($rows_clientes['tel2'], ENT_QUOTES, 'UTF-8'); ?></td>
+            	<td><?php echo htmlspecialchars($rows_clientes['nome'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+            	<td><?php echo htmlspecialchars($rows_clientes['endereco'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+            	<td><?php echo htmlspecialchars($rows_clientes['bairro'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+            	<td><?php echo htmlspecialchars($rows_clientes['cidade'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+            	<td><?php echo htmlspecialchars($rows_clientes['cep'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+            	<td><?php echo htmlspecialchars($rows_clientes['tel1'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+            	<td><?php echo htmlspecialchars($rows_clientes['tel2'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
             	<td>
 	            	<button type="button" class="btn btn-primary btn-icon-split btn-sm" data-toggle="modal" data-target="#myModal<?php echo $rows_clientes['id']; ?>">Visualizar</button>
 
 
 	            	<button type="button" class="btn btn-warning btn-icon-split btn-sm" data-toggle="modal" data-target="#exampleModal" 
-		            	data-id="<?php echo $rows_clientes['id']; ?>"
-		            	data-nome="<?php echo $rows_clientes['nome']; ?>" 
-		            	data-endereco="<?php echo $rows_clientes['endereco']; ?>" 
-		            	data-bairro="<?php echo $rows_clientes['bairro']; ?>" 
-		            	data-cidade="<?php echo $rows_clientes['cidade']; ?>"
-		            	data-estado="<?php echo $rows_clientes['estado']; ?>"
-		            	data-complemento="<?php echo $rows_clientes['complemento']; ?>"
-		            	data-cep="<?php echo $rows_clientes['cep']; ?>"
-		            	data-ponto_referecia="<?php echo $rows_clientes['ponto_referecia']; ?>"
-		            	data-tel1="<?php echo $rows_clientes['tel1']; ?>"
-		            	data-tel2="<?php echo $rows_clientes['tel2']; ?>"
-		            	data-email="<?php echo $rows_clientes['email']; ?>"
-		            	data-cpf_cnpj="<?php echo $rows_clientes['cpf_cnpj']; ?>"
-		            	data-rg="<?php echo $rows_clientes['rg']; ?>"
-		            	data-condominio="<?php echo $rows_clientes['condominio']; ?>"
-		            	data-bloco="<?php echo $rows_clientes['bloco']; ?>"
-		            	data-apartamento="<?php echo $rows_clientes['apartamento']; ?>"
-		            	data-local_entrega="<?php echo $rows_clientes['local_entrega']; ?>"
-		            	data-observacoes="<?php echo $rows_clientes['observacoes']; ?>">
+		            	data-id="<?php echo $rows_clientes['id'] ?? ''; ?>"
+		            	data-nome="<?php echo $rows_clientes['nome'] ?? ''; ?>" 
+		            	data-endereco="<?php echo $rows_clientes['endereco'] ?? ''; ?>" 
+		            	data-bairro="<?php echo $rows_clientes['bairro'] ?? ''; ?>" 
+		            	data-cidade="<?php echo $rows_clientes['cidade'] ?? ''; ?>"
+		            	data-estado="<?php echo $rows_clientes['estado'] ?? ''; ?>"
+		            	data-complemento="<?php echo $rows_clientes['complemento'] ?? ''; ?>"
+		            	data-cep="<?php echo $rows_clientes['cep'] ?? ''; ?>"
+		            	data-ponto_referecia="<?php echo $rows_clientes['ponto_referecia'] ?? ''; ?>"
+		            	data-tel1="<?php echo $rows_clientes['tel1'] ?? ''; ?>"
+		            	data-tel2="<?php echo $rows_clientes['tel2'] ?? ''; ?>"
+		            	data-email="<?php echo $rows_clientes['email'] ?? ''; ?>"
+		            	data-cpf_cnpj="<?php echo $rows_clientes['cpf_cnpj'] ?? ''; ?>"
+		            	data-rg="<?php echo $rows_clientes['rg'] ?? ''; ?>"
+		            	data-condominio="<?php echo $rows_clientes['condominio'] ?? ''; ?>"
+		            	data-bloco="<?php echo $rows_clientes['bloco'] ?? ''; ?>"
+		            	data-apartamento="<?php echo $rows_clientes['apartamento'] ?? ''; ?>"
+		            	data-local_entrega="<?php echo $rows_clientes['local_entrega'] ?? ''; ?>"
+		            	data-observacoes="<?php echo $rows_clientes['observacoes'] ?? ''; ?>">
 		            	Editar
 		        	</button>
 
@@ -222,24 +222,24 @@ $clientes = mysqli_query($conn, $tab_clientes);
 							
 						</div>
 						<div class="modal-body">
-							<p><b>Nome: </b><?php echo htmlspecialchars($rows_clientes['nome'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Endereço: </b><?php echo htmlspecialchars($rows_clientes['endereco'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Bairro: </b><?php echo htmlspecialchars($rows_clientes['bairro'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Cidade: </b><?php echo htmlspecialchars($rows_clientes['cidade'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Estado: </b><?php echo htmlspecialchars($rows_clientes['estado'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Complemento: </b><?php echo htmlspecialchars($rows_clientes['complemento'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Cep: </b><?php echo htmlspecialchars($rows_clientes['cep'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Ponto de Referência: </b><?php echo htmlspecialchars($rows_clientes['ponto_referecia'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Telefone #1: </b><?php echo htmlspecialchars($rows_clientes['tel1'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Telefone #2: </b><?php echo htmlspecialchars($rows_clientes['tel2'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>E-Mail: </b><?php echo htmlspecialchars($rows_clientes['email'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>CPF / CNPJ: </b><?php echo htmlspecialchars($rows_clientes['cpf_cnpj'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>RG: </b><?php echo htmlspecialchars($rows_clientes['rg'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Condomínio: </b><?php echo htmlspecialchars($rows_clientes['condominio'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Bloco / Edifício: </b><?php echo htmlspecialchars($rows_clientes['bloco'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Apartamento: </b><?php echo htmlspecialchars($rows_clientes['apartamento'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Local de Entrega: </b><?php echo htmlspecialchars($rows_clientes['local_entrega'], ENT_QUOTES, 'UTF-8'); ?></p>
-							<p><b>Observações: </b><?php echo htmlspecialchars($rows_clientes['observacoes'], ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Nome: </b><?php echo htmlspecialchars($rows_clientes['nome'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Endereço: </b><?php echo htmlspecialchars($rows_clientes['endereco'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Bairro: </b><?php echo htmlspecialchars($rows_clientes['bairro'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Cidade: </b><?php echo htmlspecialchars($rows_clientes['cidade'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Estado: </b><?php echo htmlspecialchars($rows_clientes['estado'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Complemento: </b><?php echo htmlspecialchars($rows_clientes['complemento'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Cep: </b><?php echo htmlspecialchars($rows_clientes['cep'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Ponto de Referência: </b><?php echo htmlspecialchars($rows_clientes['ponto_referecia'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Telefone #1: </b><?php echo htmlspecialchars($rows_clientes['tel1'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Telefone #2: </b><?php echo htmlspecialchars($rows_clientes['tel2'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>E-Mail: </b><?php echo htmlspecialchars($rows_clientes['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>CPF / CNPJ: </b><?php echo htmlspecialchars($rows_clientes['cpf_cnpj'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>RG: </b><?php echo htmlspecialchars($rows_clientes['rg'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Condomínio: </b><?php echo htmlspecialchars($rows_clientes['condominio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Bloco / Edifício: </b><?php echo htmlspecialchars($rows_clientes['bloco'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Apartamento: </b><?php echo htmlspecialchars($rows_clientes['apartamento'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Local de Entrega: </b><?php echo htmlspecialchars($rows_clientes['local_entrega'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+							<p><b>Observações: </b><?php echo htmlspecialchars($rows_clientes['observacoes'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
 
 						</div>
 					</div>

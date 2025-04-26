@@ -381,6 +381,48 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
             color: white;
             border-color: var(--primary-color);
         }
+
+        /* Quick add button styles */
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: scale(1.05);
+        }
+
+        .btn-success:active {
+            transform: scale(0.95);
+        }
+
+        .d-flex.gap-2 {
+            gap: 0.5rem;
+        }
+
+        .flex-grow-1 {
+            flex-grow: 1;
+        }
+
+        /* Feedback animation */
+        @keyframes addToCart {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .add-to-cart-animation {
+            animation: addToCart 0.5s ease;
+        }
+
+        .cart-count-animation {
+            animation: addToCart 0.5s ease;
+            background-color: #28a745 !important;
+        }
     </style>
 </head>
 
@@ -545,6 +587,11 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
 <script>
+        // Initialize tooltips
+        $(document).ready(function() {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+
         // Utility function - Debounce
         function debounce(func, wait) {
             let timeout;
@@ -623,13 +670,22 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
                                                 <p class="card-text text-muted">${produto.codigo || 'Sem código'}</p>
                                                 <p class="card-text">${produto.descricao || 'Sem descrição'}</p>
                                                 <p class="card-text"><strong>R$ ${parseFloat(produto.preco_normal || 0).toFixed(2).replace('.', ',')}</strong></p>
-                                                <button class="btn btn-primary" onclick='showProductModal(${produtoJson})'>
-                                                    Adicionar ao Pedido
-                                            </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-primary flex-grow-1" onclick='showProductModal(${produtoJson})'>
+                                                        Adicionar ao Pedido
+                                                    </button>
+                                                    <button class="btn btn-success" 
+                                                            onclick='quickAddToCart(${produtoJson})' 
+                                                            data-bs-toggle="tooltip" 
+                                                            data-bs-placement="top" 
+                                                            title="Adicionar rapidamente (sem personalizações)">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
                                 container.append(card);
                             } catch (err) {
                                 console.error('Erro ao processar produto:', err, produto);
@@ -1185,6 +1241,90 @@ function finalizarPedido() {
         icon: 'error',
         title: 'Erro',
         text: message
+    });
+}
+
+// Update the quickAddToCart function
+function quickAddToCart(product) {
+    if (!product) {
+        showError('Produto não selecionado');
+        return;
+    }
+
+    if (!mesaId) {
+        showError('Selecione uma mesa primeiro');
+        return;
+    }
+
+    // Check if product has required ingredients
+    if (product.ingredientes_obrigatorios && product.ingredientes_obrigatorios.length > 0) {
+        Swal.fire({
+            title: 'Personalização Necessária',
+            text: 'Este produto requer personalização. Por favor, use o botão "Adicionar ao Pedido" para selecionar os ingredientes.',
+            icon: 'info',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    const cartItem = {
+        mesa_id: mesaId,
+        produto: {
+            id: product.id,
+            nome: product.nome,
+            preco: parseFloat(product.preco_normal)
+        },
+        quantidade: 1,
+        ingredientes: [],
+        observacao: '',
+        valor_total: parseFloat(product.preco_normal)
+    };
+
+    // Add animation to the clicked button
+    const button = event.currentTarget;
+    button.classList.add('add-to-cart-animation');
+    setTimeout(() => button.classList.remove('add-to-cart-animation'), 500);
+
+    $.ajax({
+        url: '<?php echo $config->url("MVC/MODEL/carrinho.php"); ?>',
+        method: 'POST',
+        data: JSON.stringify(cartItem),
+        contentType: 'application/json',
+        success: function(response) {
+            if (response.success) {
+                cart = response.carrinho || [];
+                updateCartUI();
+                
+                // Add animation to cart count
+                const cartCount = $('#cartCount');
+                cartCount.addClass('cart-count-animation');
+                setTimeout(() => cartCount.removeClass('cart-count-animation'), 500);
+                
+                // Show quick confirmation toast
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+
+                Toast.fire({
+                    icon: 'success',
+                    title: `${product.nome} adicionado ao pedido`
+                });
+            } else {
+                showError(response.message || 'Erro ao adicionar item ao carrinho');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Erro ao adicionar item:', {xhr, status, error});
+            showError('Erro ao adicionar item ao carrinho');
+        }
     });
 }
 </script>

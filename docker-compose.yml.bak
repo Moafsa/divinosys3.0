@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: divinosys
+      DB_USERNAME: divino
+      DB_PASSWORD: divino123
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: divinosys
+      MYSQL_USER: divino
+      MYSQL_PASSWORD: divino123
+      MYSQL_ROOT_PASSWORD: root123
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./divinosys1.0.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  mysql_data: 

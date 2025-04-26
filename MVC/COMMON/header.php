@@ -231,6 +231,11 @@ $usuario = isset($_SESSION['nome']) ? $_SESSION['nome'] : (isset($_SESSION['user
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
 
+                <a style=" font-size: 20px; color: #888888;" class="dropdown-item" href="MVC/VIEWS/perfil.php">
+                  <i class="fas fa-user-circle fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Perfil
+                </a>
+
                 <a style=" font-size: 20px; color: #888888;" class="dropdown-item" href="#" data-toggle="modal" data-target="#CadastroModal">
                   <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                   Cadastrar Usuario
@@ -417,7 +422,119 @@ $usuario = isset($_SESSION['nome']) ? $_SESSION['nome'] : (isset($_SESSION['user
         </div>
     </div>
 
+    <!-- Modal de Perfil do Estabelecimento -->
+    <div class="modal fade" id="perfilModal" tabindex="-1" role="dialog" aria-labelledby="perfilModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="perfilModalLabel">Perfil do Estabelecimento</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form id="perfilForm" enctype="multipart/form-data">
+            <div class="modal-body">
+              <div id="perfilMsg"></div>
+              <div class="form-group">
+                <label for="perfil_nome_estabelecimento">Nome do Estabelecimento</label>
+                <input type="text" class="form-control" id="perfil_nome_estabelecimento" name="nome_estabelecimento" required>
+              </div>
+              <div class="form-group">
+                <label for="perfil_cnpj">CNPJ</label>
+                <input type="text" class="form-control" id="perfil_cnpj" name="cnpj">
+              </div>
+              <div class="form-group">
+                <label for="perfil_endereco">Endereço</label>
+                <input type="text" class="form-control" id="perfil_endereco" name="endereco">
+              </div>
+              <div class="form-group">
+                <label for="perfil_telefone">Telefone</label>
+                <input type="text" class="form-control" id="perfil_telefone" name="telefone">
+              </div>
+              <div class="form-group">
+                <label for="perfil_site">Site</label>
+                <input type="text" class="form-control" id="perfil_site" name="site">
+              </div>
+              <div class="form-group">
+                <label for="perfil_mensagem_header">Mensagem de Cabeçalho (opcional)</label>
+                <input type="text" class="form-control" id="perfil_mensagem_header" name="mensagem_header">
+              </div>
+              <div class="form-group">
+                <label for="perfil_logo">Logo</label><br>
+                <img id="perfil_logo_preview" src="MVC/COMMON/img/logo-default.png" style="width: 120px; height: 120px; object-fit: contain; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 1rem; background: #f7f7f7;">
+                <input type="file" class="form-control" id="perfil_logo" name="logo" accept="image/*">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
 </div>
 </div>
 </body>
 </html>
+
+<script>
+// Abrir modal ao clicar em Perfil
+$(document).on('click', 'a[href="MVC/VIEWS/perfil.php"]', function(e) {
+  e.preventDefault();
+  $('#perfilMsg').html('');
+  $('#perfilForm')[0].reset();
+  $('#perfil_logo_preview').attr('src', 'MVC/COMMON/img/logo-default.png');
+  // Buscar dados do perfil via AJAX
+  $.get('MVC/MODEL/get_perfil.php', function(data) {
+    if (data && data.success) {
+      $('#perfil_nome_estabelecimento').val(data.perfil.nome_estabelecimento || '');
+      $('#perfil_cnpj').val(data.perfil.cnpj || '');
+      $('#perfil_endereco').val(data.perfil.endereco || '');
+      $('#perfil_telefone').val(data.perfil.telefone || '');
+      $('#perfil_site').val(data.perfil.site || '');
+      $('#perfil_mensagem_header').val(data.perfil.mensagem_header || '');
+      if (data.perfil.logo) {
+        $('#perfil_logo_preview').attr('src', 'uploads/' + data.perfil.logo);
+      }
+    }
+  }, 'json');
+  $('#perfilModal').modal('show');
+});
+// Preview da logo
+$('#perfil_logo').on('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      $('#perfil_logo_preview').attr('src', evt.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+});
+// Submissão AJAX do formulário
+$('#perfilForm').on('submit', function(e) {
+  e.preventDefault();
+  var formData = new FormData(this);
+  $.ajax({
+    url: 'MVC/MODEL/salvar_perfil.php',
+    type: 'POST',
+    data: formData,
+    processData: false,
+    contentType: false,
+    dataType: 'json',
+    success: function(resp) {
+      if (resp.success) {
+        $('#perfilMsg').html('<div class="alert alert-success">' + resp.message + '</div>');
+        setTimeout(function() { $('#perfilModal').modal('hide'); location.reload(); }, 1200);
+      } else {
+        $('#perfilMsg').html('<div class="alert alert-danger">' + (resp.message || 'Erro ao salvar perfil') + '</div>');
+      }
+    },
+    error: function() {
+      $('#perfilMsg').html('<div class="alert alert-danger">Erro ao salvar perfil</div>');
+    }
+  });
+});
+</script>

@@ -392,14 +392,30 @@ $config = Config::getInstance();
                                 ORDER BY m.id_mesa ASC";
                         $mesas = mysqli_query($conn, $sql);
 
+                        $mesas_array = array();
                         while($mesa = mysqli_fetch_assoc($mesas)) {
+                            $mesas_array[] = $mesa;
+                        }
+                        // Ordenar mesas numericamente
+                        usort($mesas_array, function($a, $b) {
+                            return (int)$a['id_mesa'] <=> (int)$b['id_mesa'];
+                        });
+                        foreach($mesas_array as $mesa) {
                             $status_class = '';
                             $status_text = '';
                             $pedido_info = '';
-                            
+                            // Mapeamento do status numérico/textual
+                            $status_map = [
+                                '1' => 'Livre',
+                                '2' => 'Ocupada',
+                                '3' => 'Atendendo',
+                                'Livre' => 'Livre',
+                                'Ocupada' => 'Ocupada',
+                                'Atendendo' => 'Atendendo',
+                            ];
                             if (!$mesa['idpedido']) {
                                 $status_class = 'mesa-livre';
-                                $status_text = 'Livre';
+                                $status_text = isset($status_map[$mesa['mesa_status']]) ? $status_map[$mesa['mesa_status']] : 'Livre';
                             } else {
                                 switch($mesa['pedido_status']) {
                                     case 'Entregue':
@@ -408,18 +424,14 @@ $config = Config::getInstance();
                                         $status_text = 'Entregue';
                                         break;
                                     case 'Cancelado':
-                                        $status_class = 'mesa-livre';
-                                        $status_text = 'Livre';
-                                        break;
                                     case 'Finalizado':
                                         $status_class = 'mesa-livre';
                                         $status_text = 'Livre';
                                         break;
                                     default:
                                         $status_class = 'mesa-ocupada';
-                                        $status_text = 'Ocupada';
+                                        $status_text = isset($status_map[$mesa['mesa_status']]) ? $status_map[$mesa['mesa_status']] : 'Ocupada';
                                 }
-
                                 if ($mesa['idpedido']) {
                                     $pedido_info = '<p class="mb-1">Pedido #' . $mesa['idpedido'] . '</p>' .
                                                   '<p class="mb-2">R$ ' . number_format((float)$mesa['valor_total'], 2, ',', '.') . '</p>';
@@ -433,11 +445,14 @@ $config = Config::getInstance();
                                         <h4 class="mb-2">Mesa <?php echo $mesa['id_mesa']; ?></h4>
                                         <p class="mb-2"><?php echo $status_text; ?></p>
                                         <?php echo $pedido_info; ?>
-                                        <button class="btn btn-light btn-sm btn-block">
-                                            <?php echo !$mesa['idpedido'] || $mesa['pedido_status'] == 'Finalizado' || $mesa['pedido_status'] == 'Cancelado' ? 
-                                                '<i class="fas fa-plus-circle"></i> Fazer Pedido' : 
-                                                '<i class="fas fa-eye"></i> Ver Pedido'; ?>
+                                        <button class="btn btn-light btn-sm btn-block" onclick="event.stopPropagation(); window.location.href='<?php echo $config->url("?view=gerar_pedido&mesa="); ?><?php echo $mesa['id_mesa']; ?>';">
+                                            <i class="fas fa-plus-circle"></i> Fazer Pedido
                                         </button>
+                                        <?php if ($mesa['idpedido'] && $mesa['pedido_status'] != 'Finalizado' && $mesa['pedido_status'] != 'Cancelado'): ?>
+                                            <button class="btn btn-info btn-sm btn-block mt-1" onclick="event.stopPropagation(); abrirPedidoMesa(<?php echo $mesa['id_mesa']; ?>);">
+                                                <i class="fas fa-eye"></i> Ver Pedido
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>

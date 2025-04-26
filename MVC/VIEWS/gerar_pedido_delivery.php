@@ -390,36 +390,90 @@ if (isset($_SESSION['carrinho_delivery'])) {
         .is-invalid ~ .invalid-feedback {
             display: block;
         }
+
+        /* Quick add button styles */
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: scale(1.05);
+        }
+
+        .btn-success:active {
+            transform: scale(0.95);
+        }
+
+        .d-flex.gap-2 {
+            gap: 0.5rem;
+        }
+
+        .flex-grow-1 {
+            flex-grow: 1;
+        }
+
+        /* Feedback animation */
+        @keyframes addToCart {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .add-to-cart-animation {
+            animation: addToCart 0.5s ease;
+        }
+
+        .cart-count-animation {
+            animation: addToCart 0.5s ease;
+            background-color: #28a745 !important;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 1051;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-top: none;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .autocomplete-suggestion {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .autocomplete-suggestion:hover {
+            background: #f7f7f7;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Search Container -->
-    <div class="search-container">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <input type="text" id="searchInput" class="search-input" placeholder="Buscar produtos...">
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Delivery Form -->
     <div class="container mb-4">
         <div class="delivery-form">
             <h4 class="mb-3">Dados do Cliente</h4>
             <div class="row" id="deliveryFields">
                 <div class="col-md-6">
-                    <div class="form-group">
+                    <div class="form-group position-relative">
                         <label>Nome do Cliente</label>
-                        <input type="text" class="form-control" id="nomeCliente">
+                        <input type="text" class="form-control" id="nomeCliente" autocomplete="off">
+                        <div id="autocomplete-nome" class="autocomplete-suggestions"></div>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="form-group">
+                    <div class="form-group position-relative">
                         <label>Telefone</label>
-                        <input type="tel" class="form-control" id="telefone">
+                        <input type="tel" class="form-control" id="telefone" autocomplete="off">
+                        <div id="autocomplete-telefone" class="autocomplete-suggestions"></div>
                     </div>
                 </div>
                 <div class="col-12">
@@ -466,6 +520,17 @@ if (isset($_SESSION['carrinho_delivery'])) {
     <div class="container">
         <div class="category-container" id="categories">
             <!-- Categories will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Search Container -->
+    <div class="search-container">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Buscar produtos...">
+                </div>
+            </div>
         </div>
     </div>
 
@@ -614,6 +679,11 @@ if (isset($_SESSION['carrinho_delivery'])) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     
     <script>
+        // Initialize tooltips
+        $(document).ready(function() {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+
         // Utility function - Debounce
         function debounce(func, wait) {
             let timeout;
@@ -645,7 +715,7 @@ if (isset($_SESSION['carrinho_delivery'])) {
 
             // Garantir que search seja uma string
             search = String(search || '');
-            console.log('Iniciando busca com termo:', search, 'categoria:', category);
+console.log('Iniciando busca com termo:', search, 'categoria:', category);
 
             const requestData = {
                 query: search,
@@ -691,9 +761,18 @@ if (isset($_SESSION['carrinho_delivery'])) {
                                                 <p class="card-text text-muted">${produto.codigo || 'Sem código'}</p>
                                                 <p class="card-text">${produto.descricao || 'Sem descrição'}</p>
                                                 <p class="card-text"><strong>R$ ${parseFloat(produto.preco_normal || 0).toFixed(2).replace('.', ',')}</strong></p>
-                                                <button class="btn btn-primary" onclick='showProductModal(${produtoJson})'>
-                                                    Adicionar ao Pedido
-                                                </button>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-primary flex-grow-1" onclick='showProductModal(${produtoJson})'>
+                                                        Adicionar ao Pedido
+                                                    </button>
+                                                    <button class="btn btn-success" 
+                                                            onclick='quickAddToCart(${produtoJson})' 
+                                                            data-bs-toggle="tooltip" 
+                                                            data-bs-placement="top" 
+                                                            title="Adicionar rapidamente (sem personalizações)">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -865,6 +944,96 @@ if (isset($_SESSION['carrinho_delivery'])) {
                     $(this).val(value);
                 }
             });
+
+            // Autocomplete para nome do cliente
+            $('#nomeCliente').on('input', function() {
+                const nome = $(this).val().trim();
+                if (nome.length < 2) {
+                    $('#autocomplete-nome').empty().hide();
+                    return;
+                }
+                $.ajax({
+                    url: 'MVC/MODEL/buscar_cliente.php',
+                    method: 'GET',
+                    data: { nome: nome },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success && response.clientes.length > 0) {
+                            let html = '';
+                            response.clientes.forEach(cliente => {
+                                html += `<div class='autocomplete-suggestion' data-cliente='${JSON.stringify(cliente)}'>${cliente.nome} - ${cliente.tel1 || ''}</div>`;
+                            });
+                            $('#autocomplete-nome').html(html).show();
+                        } else {
+                            $('#autocomplete-nome').empty().hide();
+                        }
+                    },
+                    error: function() {
+                        $('#autocomplete-nome').empty().hide();
+                    }
+                });
+            });
+
+            $('#autocomplete-nome').on('click', '.autocomplete-suggestion', function() {
+                const cliente = JSON.parse($(this).attr('data-cliente'));
+                preencherFormularioCliente(cliente);
+                $('#autocomplete-nome').empty().hide();
+            });
+
+            // Autocomplete para telefone
+            $('#telefone').on('input', function() {
+                const telefone = $(this).val().replace(/\D/g, '');
+                if (telefone.length < 8) {
+                    $('#autocomplete-telefone').empty().hide();
+                    return;
+                }
+                $.ajax({
+                    url: 'MVC/MODEL/buscar_cliente.php',
+                    method: 'GET',
+                    data: { telefone: telefone },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success && response.clientes.length > 0) {
+                            let html = '';
+                            response.clientes.forEach(cliente => {
+                                html += `<div class='autocomplete-suggestion' data-cliente='${JSON.stringify(cliente)}'>${cliente.nome} - ${cliente.tel1 || ''}</div>`;
+                            });
+                            $('#autocomplete-telefone').html(html).show();
+                        } else {
+                            $('#autocomplete-telefone').empty().hide();
+                        }
+                    },
+                    error: function() {
+                        $('#autocomplete-telefone').empty().hide();
+                    }
+                });
+            });
+
+            $('#autocomplete-telefone').on('click', '.autocomplete-suggestion', function() {
+                const cliente = JSON.parse($(this).attr('data-cliente'));
+                preencherFormularioCliente(cliente);
+                $('#autocomplete-telefone').empty().hide();
+            });
+
+            function preencherFormularioCliente(cliente) {
+                $('#nomeCliente').val(cliente.nome || '');
+                $('#telefone').val(cliente.tel1 || '');
+                $('#endereco').val(cliente.endereco || '');
+                $('#referencia').val(cliente.referencia || '');
+                if ($('#bairro').length) $('#bairro').val(cliente.bairro || '');
+                if ($('#cidade').length) $('#cidade').val(cliente.cidade || '');
+                if ($('#estado').length) $('#estado').val(cliente.estado || '');
+                if ($('#complemento').length) $('#complemento').val(cliente.complemento || '');
+                if ($('#cep').length) $('#cep').val(cliente.cep || '');
+                if ($('#email').length) $('#email').val(cliente.email || '');
+                if ($('#cpf_cnpj').length) $('#cpf_cnpj').val(cliente.cpf_cnpj || '');
+                if ($('#rg').length) $('#rg').val(cliente.rg || '');
+                if ($('#condominio').length) $('#condominio').val(cliente.condominio || '');
+                if ($('#bloco').length) $('#bloco').val(cliente.bloco || '');
+                if ($('#apartamento').length) $('#apartamento').val(cliente.apartamento || '');
+                if ($('#local_entrega').length) $('#local_entrega').val(cliente.local_entrega || '');
+                if ($('#observacoes').length) $('#observacoes').val(cliente.observacoes || '');
+            }
         });
 
         // Load cart from server
@@ -1269,6 +1438,84 @@ if (isset($_SESSION['carrinho_delivery'])) {
                 icon: 'error',
                 title: 'Erro',
                 text: message
+            });
+        }
+
+        // Update the quickAddToCart function
+        function quickAddToCart(product) {
+            if (!product) {
+                showError('Produto não selecionado');
+                return;
+            }
+
+            // Check if product has required ingredients
+            if (product.ingredientes_obrigatorios && product.ingredientes_obrigatorios.length > 0) {
+                Swal.fire({
+                    title: 'Personalização Necessária',
+                    text: 'Este produto requer personalização. Por favor, use o botão "Adicionar ao Pedido" para selecionar os ingredientes.',
+                    icon: 'info',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            const cartItem = {
+                produto: {
+                    id: product.id,
+                    nome: product.nome,
+                    preco: parseFloat(product.preco_normal)
+                },
+                quantidade: 1,
+                ingredientes: [],
+                observacao: '',
+                valor_total: parseFloat(product.preco_normal)
+            };
+
+            // Add animation to the clicked button
+            const button = event.currentTarget;
+            button.classList.add('add-to-cart-animation');
+            setTimeout(() => button.classList.remove('add-to-cart-animation'), 500);
+
+            $.ajax({
+                url: '<?php echo $config->url("MVC/MODEL/carrinho_delivery.php"); ?>',
+                method: 'POST',
+                data: JSON.stringify(cartItem),
+                contentType: 'application/json',
+                success: function(response) {
+                    if (response.success) {
+                        cart = response.carrinho || [];
+                        updateCartUI();
+                        
+                        // Add animation to cart count
+                        const cartCount = $('#cartCount');
+                        cartCount.addClass('cart-count-animation');
+                        setTimeout(() => cartCount.removeClass('cart-count-animation'), 500);
+                        
+                        // Show quick confirmation toast
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 1500,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        });
+
+                        Toast.fire({
+                            icon: 'success',
+                            title: `${product.nome} adicionado ao pedido`
+                        });
+                    } else {
+                        showError(response.message || 'Erro ao adicionar item ao carrinho');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro ao adicionar item:', {xhr, status, error});
+                    showError('Erro ao adicionar item ao carrinho');
+                }
             });
         }
     </script>

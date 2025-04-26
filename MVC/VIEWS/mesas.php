@@ -7,18 +7,36 @@ if (!isset($_SESSION["login"]) || $_SESSION["login"] != 1) {
 
 $config = Config::getInstance();
 
-// Buscar mesas e seus pedidos ativos do banco de dados
+// Buscar mesas e o último pedido de cada mesa (incluindo entregues)
 $query = "SELECT m.*, 
-          p.idpedido, 
-          p.valor_total, 
-          p.data, 
-          p.hora_pedido,
-          p.status as status_pedido
-          FROM mesas m
-          LEFT JOIN pedido p ON m.id_mesa = p.idmesa 
-          AND p.status NOT IN ('Finalizado', 'Entregue', 'Entregue (Mesa)', 'Entregue (Delivery)', 'Cancelado')
-          ORDER BY m.id_mesa";
+    (
+        SELECT p1.idpedido FROM pedido p1 WHERE p1.idmesa = m.id_mesa ORDER BY p1.data DESC, p1.hora_pedido DESC LIMIT 1
+    ) as idpedido,
+    (
+        SELECT p1.valor_total FROM pedido p1 WHERE p1.idmesa = m.id_mesa ORDER BY p1.data DESC, p1.hora_pedido DESC LIMIT 1
+    ) as valor_total,
+    (
+        SELECT p1.data FROM pedido p1 WHERE p1.idmesa = m.id_mesa ORDER BY p1.data DESC, p1.hora_pedido DESC LIMIT 1
+    ) as data,
+    (
+        SELECT p1.hora_pedido FROM pedido p1 WHERE p1.idmesa = m.id_mesa ORDER BY p1.data DESC, p1.hora_pedido DESC LIMIT 1
+    ) as hora_pedido,
+    (
+        SELECT p1.status FROM pedido p1 WHERE p1.idmesa = m.id_mesa ORDER BY p1.data DESC, p1.hora_pedido DESC LIMIT 1
+    ) as status_pedido
+FROM mesas m
+ORDER BY m.id_mesa";
 $result = mysqli_query($conn, $query);
+
+// Carregar todas as mesas em array para ordenar numericamente
+$mesas_array = array();
+while ($row = mysqli_fetch_assoc($result)) {
+    $mesas_array[] = $row;
+}
+// Ordenar mesas numericamente
+usort($mesas_array, function($a, $b) {
+    return (int)$a['id_mesa'] <=> (int)$b['id_mesa'];
+});
 
 // Array para armazenar os itens dos pedidos
 $itens_pedidos = array();
@@ -210,18 +228,36 @@ if (!empty($pedidos_ids)) {
     <h1 class="h3 mb-4 text-gray-800">Gerenciamento de Mesas</h1>
     
     <div class="row">
-        <?php while ($mesa = mysqli_fetch_assoc($result)): 
+        <?php foreach ($mesas_array as $mesa): 
             $status_class = '';
-            switch($mesa["status"]) {
-                case 'Livre':
-                    $status_class = 'mesa-livre';
-                    break;
-                case 'Ocupada':
-                    $status_class = 'mesa-ocupada';
-                    break;
-                case 'Atendendo':
-                    $status_class = 'mesa-atendendo';
-                    break;
+            $status_map = [
+                '1' => 'Livre',
+                '2' => 'Ocupada',
+                '3' => 'Atendendo',
+                'Livre' => 'Livre',
+                'Ocupada' => 'Ocupada',
+                'Atendendo' => 'Atendendo',
+            ];
+            // Novo: status textual baseado no status do pedido
+            if (!empty($mesa['status_pedido'])) {
+                switch ($mesa['status_pedido']) {
+                    case 'Entregue':
+                    case 'Entregue (Mesa)':
+                        $status_text = 'Entregue';
+                        $status_class = 'mesa-entregue';
+                        break;
+                    case 'Cancelado':
+                    case 'Finalizado':
+                        $status_text = 'Livre';
+                        $status_class = 'mesa-livre';
+                        break;
+                    default:
+                        $status_text = isset($status_map[$mesa['status']]) ? $status_map[$mesa['status']] : $mesa['status'];
+                        $status_class = ($status_text === 'Livre') ? 'mesa-livre' : (($status_text === 'Ocupada') ? 'mesa-ocupada' : 'mesa-atendendo');
+                }
+            } else {
+                $status_text = isset($status_map[$mesa['status']]) ? $status_map[$mesa['status']] : $mesa['status'];
+                $status_class = ($status_text === 'Livre') ? 'mesa-livre' : (($status_text === 'Ocupada') ? 'mesa-ocupada' : 'mesa-atendendo');
             }
         ?>
             <div class="col-xl-3 col-md-6 mb-4">
@@ -233,18 +269,20 @@ if (!empty($pedidos_ids)) {
                                     Mesa <?php echo $mesa["id_mesa"]; ?>
                                 </div>
                                 <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Status: <?php echo $mesa["status"]; ?>
+                                    Status: <?php echo $status_text; ?>
                                 </div>
-                                <?php if ($mesa['idpedido']): ?>
-                                    <div class="text-xs text-muted mt-2">
-                                        Pedido #<?php echo $mesa['idpedido']; ?><br>
-                                        <?php echo date('d/m/Y H:i', strtotime($mesa['data'] . ' ' . $mesa['hora_pedido'])); ?><br>
-                                        R$ <?php echo number_format($mesa['valor_total'], 2, ',', '.'); ?>
-                                    </div>
+                                <?php if ($status_text === 'Ocupada' || $status_text === 'Entregue'): ?>
+                                    <?php if ($mesa['idpedido']): ?>
+                                        <div class="text-xs text-muted mt-2">
+                                            Pedido #<?php echo $mesa['idpedido']; ?><br>
+                                            <?php echo date('d/m/Y H:i', strtotime($mesa['data'] . ' ' . $mesa['hora_pedido'])); ?><br>
+                                            R$ <?php echo number_format($mesa['valor_total'], 2, ',', '.'); ?>
+                                        </div>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </div>
                             <div class="col-auto">
-                                <?php if ($mesa['idpedido']): ?>
+                                <?php if ($status_text === 'Ocupada' && $mesa['idpedido']): ?>
                                     <button onclick="verPedido(<?php echo $mesa['idpedido']; ?>)" 
                                             class="btn btn-info btn-sm mb-2">
                                         <i class="fas fa-eye"></i> Ver Pedido
@@ -254,18 +292,22 @@ if (!empty($pedidos_ids)) {
                                             class="btn btn-success btn-sm">
                                         <i class="fas fa-check-circle"></i> Fechar Pedido
                                     </button>
-                                <?php else: ?>
-                                    <a href="<?php echo $config->url("?view=gerar_pedido&mesa=" . $mesa["id_mesa"]); ?>" 
-                                       class="btn btn-primary btn-sm">
-                                        <i class="fas fa-plus-circle"></i> Fazer Pedido
-                                    </a>
+                                <?php elseif ($status_text === 'Entregue' && $mesa['idpedido']): ?>
+                                    <button onclick="verPedido(<?php echo $mesa['idpedido']; ?>)" 
+                                            class="btn btn-info btn-sm mb-2">
+                                        <i class="fas fa-eye"></i> Ver Pedido
+                                    </button>
                                 <?php endif; ?>
+                                <a href="<?php echo $config->url("?view=gerar_pedido&mesa=" . $mesa["id_mesa"]); ?>" 
+                                   class="btn btn-primary btn-sm mt-2">
+                                    <i class="fas fa-plus-circle"></i> Fazer Pedido
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        <?php endwhile; ?>
+        <?php endforeach; ?>
     </div>
 </div>
 
@@ -274,6 +316,25 @@ if (!empty($pedidos_ids)) {
     <div class="pedido-modal-content">
         <span class="close-modal" onclick="fecharModal()">&times;</span>
         <div id="pedidoConteudo"></div>
+    </div>
+</div>
+
+<!-- Modal de Edição de Pedido -->
+<div id="editarPedidoModal" class="pedido-modal">
+    <div class="pedido-modal-content" style="max-width: 700px;">
+        <span class="close-modal" onclick="fecharEditarPedidoModal()">&times;</span>
+        <h4>Editar Pedido</h4>
+        <form id="formEditarPedido">
+            <div class="form-group mb-2">
+                <label for="editarMesa">Mesa</label>
+                <select id="editarMesa" name="mesa" class="form-control"></select>
+            </div>
+            <div id="itensPedidoEdit"></div>
+            <button type="button" class="btn btn-primary btn-sm mt-2" onclick="adicionarItemEdit()">Adicionar Item</button>
+            <div class="text-end mt-3">
+                <button type="button" class="btn btn-success" onclick="salvarEdicaoPedido()">Salvar Alterações</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -300,7 +361,6 @@ function verPedido(pedidoId) {
         })
         .then(data => {
             if (data.success) {
-                console.log('Dados recebidos:', data);
                 let html = `
                     <div class="pedido-card expanded">
                         <div class="pedido-header">
@@ -318,8 +378,17 @@ function verPedido(pedidoId) {
                             </div>
                             <div class="text-end">
                                 <div class="btn-group">
-                                    <button onclick="fecharPedido(${pedidoId})" class="btn btn-success btn-sm">
-                                        <i class="fas fa-check-circle"></i> Fechar Pedido
+                                    ${data.pedido.status === 'Entregue' || data.pedido.status === 'Entregue (Mesa)' ? `
+                                        <button onclick="fecharPedido(${pedidoId})" class="btn btn-success btn-sm">
+                                            <i class="fas fa-check-circle"></i> Fechar Pedido
+                                        </button>
+                                    ` : (data.pedido.status === 'Ocupada' || data.pedido.status === 'Pendente') ? `
+                                        <button onclick="entregarPedido(${pedidoId})" class="btn btn-info btn-sm">
+                                            <i class="fas fa-utensils"></i> Entregar Pedido
+                                        </button>
+                                    ` : ''}
+                                    <button onclick="editarPedido(${pedidoId})" class="btn btn-warning btn-sm ms-2">
+                                        <i class="fas fa-edit"></i> Editar Pedido
                                     </button>
                                 </div>
                             </div>
@@ -426,7 +495,7 @@ function fecharPedido(pedidoId) {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: `pedido_id=${pedidoId}&status=Entregue`
+            body: `pedido_id=${pedidoId}&status=Finalizado`
         })
         .then(response => response.json())
         .then(data => {
@@ -441,6 +510,108 @@ function fecharPedido(pedidoId) {
             alert('Erro ao fechar pedido');
         });
     }
+}
+
+function entregarPedido(pedidoId) {
+    if (confirm('Confirmar entrega do pedido?')) {
+        fetch('MVC/MODEL/atualizar_status_pedido.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `pedido_id=${pedidoId}&status=Entregue`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erro ao entregar pedido: ' + (data.message || 'Erro desconhecido'));
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao entregar pedido');
+        });
+    }
+}
+
+function editarPedido(pedidoId) {
+    // Buscar dados do pedido e mesas disponíveis
+    Promise.all([
+        fetch(`MVC/MODEL/buscar_pedido.php?pedido_id=${pedidoId}`).then(r => r.json()),
+        fetch('MVC/MODEL/buscar_mesas.php').then(r => r.json())
+    ]).then(([pedidoData, mesasData]) => {
+        if (!pedidoData.success) return alert('Erro ao buscar pedido');
+        if (!mesasData.success) return alert('Erro ao buscar mesas');
+        // Preencher select de mesas
+        const selectMesa = document.getElementById('editarMesa');
+        selectMesa.innerHTML = mesasData.mesas.map(m => `<option value="${m.id_mesa}" ${m.id_mesa == pedidoData.pedido.idmesa ? 'selected' : ''}>Mesa ${m.id_mesa}</option>`).join('');
+        // Preencher itens do pedido
+        const itensDiv = document.getElementById('itensPedidoEdit');
+        itensDiv.innerHTML = pedidoData.itens.map((item, idx) => renderItemEdit(item, idx)).join('');
+        // Exibir modal
+        document.getElementById('editarPedidoModal').style.display = 'block';
+        // Guardar id do pedido em edição
+        document.getElementById('formEditarPedido').setAttribute('data-pedido-id', pedidoId);
+    }).catch(() => alert('Erro ao carregar dados para edição.'));
+}
+
+function fecharEditarPedidoModal() {
+    document.getElementById('editarPedidoModal').style.display = 'none';
+}
+
+function renderItemEdit(item, idx) {
+    return `<div class="card mb-2 p-2" data-idx="${idx}">
+        <div class="row align-items-center">
+            <div class="col-5">
+                <input type="text" class="form-control form-control-sm" name="produto[]" value="${item.produto}" readonly>
+            </div>
+            <div class="col-2">
+                <input type="number" class="form-control form-control-sm" name="quantidade[]" value="${item.quantidade}" min="1">
+            </div>
+            <div class="col-3">
+                <input type="text" class="form-control form-control-sm" name="observacao[]" value="${item.observacao || ''}" placeholder="Observação">
+            </div>
+            <div class="col-2 text-end">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removerItemEdit(${idx})">Remover</button>
+            </div>
+        </div>
+    </div>`;
+}
+
+function adicionarItemEdit() {
+    // Aqui futuramente buscar produtos do backend
+    const idx = document.querySelectorAll('#itensPedidoEdit .card').length;
+    const novoItem = { produto: '', quantidade: 1, observacao: '' };
+    const div = document.createElement('div');
+    div.innerHTML = renderItemEdit(novoItem, idx);
+    document.getElementById('itensPedidoEdit').appendChild(div.firstChild);
+}
+
+function removerItemEdit(idx) {
+    const card = document.querySelector(`#itensPedidoEdit .card[data-idx='${idx}']`);
+    if (card) card.remove();
+}
+
+function salvarEdicaoPedido() {
+    const form = document.getElementById('formEditarPedido');
+    const formData = new FormData(form);
+    formData.append('pedido_id', form.getAttribute('data-pedido-id'));
+    fetch('MVC/MODEL/editar_pedido.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            fecharEditarPedidoModal();
+            location.reload();
+        } else {
+            alert('Erro ao salvar edição: ' + (data.message || 'Erro desconhecido'));
+        }
+    })
+    .catch(() => alert('Erro ao salvar edição.'));
 }
 
 // Fechar modal quando clicar fora dele

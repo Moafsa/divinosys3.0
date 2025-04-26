@@ -262,53 +262,53 @@ function escape($str) {
 <script src="MVC/COMMON/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
 <script>
-var dataTable;
-
 $(document).ready(function() {
-    // Destroy existing DataTable if it exists
-    if (dataTable) {
-        dataTable.destroy();
-    }
-    
-    // Initialize DataTable
-    dataTable = $('#dataTable').DataTable({
+    // Inicializa o DataTable apenas uma vez
+    $('#dataTable').DataTable({
         "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json"
+            "url": "MVC/COMMON/vendor/datatables/i18n/Portuguese-Brasil.json"
         },
         "pageLength": 10,
         "ordering": true,
-        "searching": true,
-        "destroy": true
+        "searching": true
     });
 
-    // Edit Product
-    $('.edit-product').click(function() {
+    // Editar Produto - evento delegado
+    $(document).on('click', '.edit-product', function() {
         var id = $(this).data('id');
-        var nome = $(this).data('nome');
-        var categoria = $(this).data('categoria');
-        var preco = $(this).data('preco');
-        var descricao = $(this).data('descricao');
-        var estoque = $(this).data('estoque');
-        var estoqueMinimo = $(this).data('estoque-minimo');
-        var custo = $(this).data('custo');
-        var marca = $(this).data('marca');
-
-        $('#edit_id').val(id);
-        $('#edit_nome').val(nome);
-        $('#edit_categoria').val(categoria);
-        $('#edit_preco').val(preco);
-        $('#edit_descricao').val(descricao);
-        $('#edit_estoque').val(estoque);
-        $('#edit_estoque_minimo').val(estoqueMinimo);
-        $('#edit_custo').val(custo);
-        $('#edit_marca').val(marca);
+        if (!id) return;
+        $.ajax({
+            url: 'MVC/MODEL/buscar_produto.php',
+            method: 'GET',
+            data: { id: id },
+            dataType: 'json',
+            success: function(produto) {
+                $('#edit_id').val(produto.id || '');
+                $('#edit_nome').val(produto.nome || '');
+                $('#edit_categoria').val(produto.categoria_id || '');
+                $('#edit_preco').val(produto.preco_normal || '');
+                $('#edit_descricao').val(produto.descricao || '');
+                $('#edit_estoque').val(produto.estoque_atual || '');
+                $('#edit_estoque_minimo').val(produto.estoque_minimo || '');
+                $('#edit_custo').val(produto.preco_custo || '');
+                $('#edit_marca').val(produto.marca || '');
+                if (produto.imagem) {
+                    $('#current_image').html('<img src="uploads/produtos/' + produto.imagem + '" alt="Imagem atual" style="max-width: 80px;">');
+                } else {
+                    $('#current_image').html('');
+                }
+                $('#editProductModal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                alert('Erro ao buscar dados do produto.');
+            }
+        });
     });
 
-    // Delete Product
-    $('.delete-product').click(function() {
+    // Excluir Produto
+    $(document).on('click', '.delete-product', function() {
         var id = $(this).data('id');
         var nome = $(this).data('nome');
-        
         if (confirm('Tem certeza que deseja excluir o produto "' + nome + '"?')) {
             window.location.href = 'MVC/MODEL/excluir_produto.php?id=' + id;
         }
