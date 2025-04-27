@@ -390,6 +390,9 @@ function verPedido(pedidoId) {
                                     <button onclick="editarPedido(${pedidoId})" class="btn btn-warning btn-sm ms-2">
                                         <i class="fas fa-edit"></i> Editar Pedido
                                     </button>
+                                    <button onclick="imprimirPedido(${pedidoId})" class="btn btn-secondary btn-sm ms-2">
+                                        <i class="fas fa-print"></i> Imprimir Pedido
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -620,5 +623,10 @@ window.onclick = function(event) {
     if (event.target == modal) {
         modal.style.display = 'none';
     }
+}
+
+// Adicionar função de impressão
+function imprimirPedido(pedidoId) {
+    window.open(`MVC/VIEWS/imprimir_pedido.php?pedido_id=${pedidoId}`, '_blank');
 }
 </script>

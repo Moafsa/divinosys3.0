@@ -1,13 +1,13 @@
 <?php
 return array (
   'nome_estabelecimento' => 'DIVINO LANCHES',
-  'cnpj' => 'XX.XXX.XXX/0001-XX',
-  'endereco' => 'Endereço do Estabelecimento',
-  'telefone' => '(XX) XXXX-XXXX',
-  'site' => 'www.seusite.com.br',
+  'cnpj' => '',
+  'endereco' => '',
+  'telefone' => '(54) 3771-6480',
+  'site' => 'www.divinolanches.com.br',
   'messages' => 
   array (
     'header' => '',
+    'footer' => '',
   ),
-  'logo' => 'logo_1745702197.png',
 );

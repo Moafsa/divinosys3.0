@@ -609,6 +609,9 @@ function verPedido(pedidoId) {
                                     <button onclick="converterParaDelivery(${pedidoId})" class="btn btn-primary btn-sm ms-2">
                                         <i class="fas fa-motorcycle"></i> Fazer Delivery
                                     </button>
+                                    <button onclick="imprimirPedido(${pedidoId}, ${data.pedido.delivery ? 1 : 0})" class="btn btn-secondary btn-sm ms-2">
+                                        <i class="fas fa-print"></i> Imprimir Pedido
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -889,6 +892,14 @@ function converterParaDelivery(pedidoId) {
             });
         }
     });
+}
+
+function imprimirPedido(pedidoId, isDelivery) {
+    if (isDelivery) {
+        window.open(`MVC/VIEWS/imprimir_pedido_delivery.php?pedido_id=${pedidoId}`, '_blank');
+    } else {
+        window.open(`MVC/VIEWS/imprimir_pedido.php?pedido_id=${pedidoId}`, '_blank');
+    }
 }
 </script>
 

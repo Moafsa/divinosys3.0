@@ -22,10 +22,10 @@ $selected_status = isset($_GET['status']) ? $_GET['status'] : 'Todos';
                     <option value="<?php echo $opt; ?>" <?php if ($selected_status == $opt) echo 'selected'; ?>><?php echo $opt; ?></option>
                 <?php endforeach; ?>
             </select>
-        </div>
+</div>
     </form>
     <div id="delivery-list">
-        <?php
+<?php
         $where = "(p.tipo = 'delivery' OR p.endereco_entrega IS NOT NULL)";
         if ($selected_status && $selected_status != 'Todos') {
             $where .= " AND p.status = '" . mysqli_real_escape_string($conn, $selected_status) . "'";
@@ -43,7 +43,9 @@ $selected_status = isset($_GET['status']) ? $_GET['status'] : 'Todos';
                 echo '<div class="col-md-6 col-lg-4 mb-3">';
                 echo '<div class="card shadow">';
                 echo '<div class="card-body">';
-                echo '<h5 class="card-title">Pedido #'.$pedido['idpedido'].' <span class="badge bg-info">'.htmlspecialchars($pedido['status']).'</span></h5>';
+                echo '<h5 class="card-title">Pedido #'.$pedido['idpedido'].' <span class="badge bg-info">'.htmlspecialchars($pedido['status']).'</span>';
+                echo ' <button class="btn btn-secondary btn-sm ms-2" onclick="imprimirPedidoDelivery('.$pedido['idpedido'].')"><i class="fas fa-print"></i></button>';
+                echo '</h5>';
                 echo '<p><strong>Cliente:</strong> '.htmlspecialchars($pedido['cliente_nome'] ?? $pedido['nome_cliente'] ?? '-').'</p>';
                 echo '<p><strong>Telefone:</strong> '.htmlspecialchars($pedido['cliente_tel'] ?? $pedido['telefone'] ?? '-').'</p>';
                 echo '<p><strong>Endereço:</strong> '.htmlspecialchars($pedido['endereco_entrega'] ?? $pedido['cliente_endereco'] ?? '-');
@@ -68,7 +70,7 @@ $selected_status = isset($_GET['status']) ? $_GET['status'] : 'Todos';
             echo '<div class="container-fluid mb-4"><h5>Nenhum pedido de delivery encontrado.</h5></div>';
         }
         ?>
-    </div>
+	</div>
 </div>
 <script>
 function marcarEntregue(pedidoId) {
@@ -82,10 +84,14 @@ function marcarEntregue(pedidoId) {
     .then(data => {
         if (data.success) {
             location.reload();
-        } else {
+} else {
             alert('Erro ao atualizar status: ' + (data.message || 'Erro desconhecido'));
         }
     })
     .catch(() => alert('Erro ao atualizar status.'));
+}
+// Função para imprimir pedido delivery
+function imprimirPedidoDelivery(pedidoId) {
+    window.open('MVC/VIEWS/imprimir_pedido_delivery.php?pedido_id=' + pedidoId, '_blank');
 }
 </script>

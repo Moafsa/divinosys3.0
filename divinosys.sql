@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db:3306
--- Tempo de geração: 26/04/2025 às 22:07
+-- Tempo de geração: 27/04/2025 às 18:32
 -- Versão do servidor: 8.0.42
 -- Versão do PHP: 8.2.27
 
@@ -163,13 +163,6 @@ CREATE TABLE `clientes` (
   `observacoes` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
---
--- Despejando dados para a tabela `clientes`
---
-
-INSERT INTO `clientes` (`id`, `nome`, `endereco`, `bairro`, `cidade`, `estado`, `complemento`, `cep`, `ponto_referencia`, `tel1`, `tel2`, `email`, `cpf_cnpj`, `rg`, `condominio`, `bloco`, `apartamento`, `local_entrega`, `observacoes`) VALUES
-(3, '', '', NULL, NULL, NULL, NULL, NULL, '', '54997092223', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -245,7 +238,8 @@ CREATE TABLE `estoque` (
 
 INSERT INTO `estoque` (`id`, `produto_id`, `estoque_atual`, `estoque_minimo`, `preco_custo`, `marca`, `fornecedor`, `data_compra`, `data_validade`, `unidade`, `observacoes`, `created_at`, `updated_at`) VALUES
 (1, 79, 1.00, 5.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-24 18:15:51', '2025-04-24 18:28:28'),
-(2, 80, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-26 17:09:40', '2025-04-26 17:09:40');
+(2, 80, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-26 17:09:40', '2025-04-26 17:09:40'),
+(6, 59, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-27 18:02:09', '2025-04-27 18:02:09');
 
 -- --------------------------------------------------------
 
@@ -320,55 +314,6 @@ CREATE TABLE `log_pedidos` (
   `data_alteracao` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Despejando dados para a tabela `log_pedidos`
---
-
-INSERT INTO `log_pedidos` (`id`, `idpedido`, `status_anterior`, `novo_status`, `usuario`, `data_alteracao`) VALUES
-(1, 49, 'Pendente', 'Em Preparo', 'admin2', '2025-04-24 16:07:55'),
-(2, 49, 'Em Preparo', 'Pronto', 'admin2', '2025-04-24 16:08:01'),
-(3, 49, 'Pronto', 'Entregue', 'admin2', '2025-04-24 16:08:06'),
-(4, 49, 'Entregue', 'Finalizado', 'admin2', '2025-04-24 16:08:52'),
-(5, 50, 'Pendente', 'Cancelado', 'admin2', '2025-04-24 20:13:13'),
-(6, 53, 'Pendente', 'Em Preparo', 'admin2', '2025-04-24 20:41:31'),
-(7, 53, 'Em Preparo', 'Pronto', 'admin2', '2025-04-24 20:41:35'),
-(8, 53, 'Pronto', 'Saiu para Entrega', 'admin2', '2025-04-24 20:41:39'),
-(9, 53, 'Saiu para Entrega', 'Entregue', 'admin2', '2025-04-24 20:41:45'),
-(10, 57, 'Pendente', 'Cancelado', 'admin2', '2025-04-26 17:39:39'),
-(11, 51, 'Pendente', 'Entregue', 'admin2', '2025-04-26 17:42:21'),
-(12, 51, 'Entregue', 'Finalizado', 'admin2', '2025-04-26 17:42:27'),
-(13, 48, 'Pendente', 'Entregue', 'admin2', '2025-04-26 17:42:33'),
-(14, 48, 'Entregue', 'Finalizado', 'admin2', '2025-04-26 17:42:39'),
-(15, 52, 'Pendente', 'Entregue', 'admin2', '2025-04-26 17:42:46'),
-(16, 52, 'Entregue', 'Finalizado', 'admin2', '2025-04-26 17:42:51'),
-(17, 58, 'Pendente', 'Em Preparo', 'admin2', '2025-04-26 17:49:31'),
-(18, 58, 'Em Preparo', 'Pronto', 'admin2', '2025-04-26 17:49:36'),
-(19, 58, 'Pronto', 'Entregue', 'admin2', '2025-04-26 17:49:45'),
-(20, 59, 'Pendente', 'Em Preparo', 'admin2', '2025-04-26 18:18:59'),
-(21, 59, 'Em Preparo', 'Pronto', 'admin2', '2025-04-26 18:19:04'),
-(22, 59, 'Pronto', 'Entregue', 'admin2', '2025-04-26 18:19:07'),
-(23, 59, 'Entregue', 'Finalizado', 'admin2', '2025-04-26 18:33:52'),
-(24, 58, 'Entregue', 'Finalizado', 'admin2', '2025-04-26 18:33:57'),
-(25, 60, 'Pendente', 'Em Preparo', 'admin2', '2025-04-26 18:35:17'),
-(26, 60, 'Em Preparo', 'Pronto', 'admin2', '2025-04-26 18:35:22'),
-(27, 60, 'Pronto', 'Entregue', 'admin2', '2025-04-26 18:35:25'),
-(28, 48, 'Finalizado', 'Entregue', 'admin2', '2025-04-26 18:47:15'),
-(29, 60, 'Entregue', 'Finalizado', 'admin2', '2025-04-26 18:53:00'),
-(30, 48, 'Entregue', 'Finalizado', 'admin2', '2025-04-26 19:14:54'),
-(31, 62, 'Pendente', 'Entregue', 'admin2', '2025-04-26 19:17:39'),
-(32, 63, 'Pendente', 'Em Preparo', 'admin2', '2025-04-26 19:18:58'),
-(33, 63, 'Em Preparo', 'Pronto', 'admin2', '2025-04-26 19:19:03'),
-(34, 63, 'Pronto', 'Entregue', 'admin2', '2025-04-26 19:19:29'),
-(35, 63, 'Entregue', 'Finalizado', 'admin2', '2025-04-26 19:25:08'),
-(36, 65, 'Pendente', 'Cancelado', 'admin2', '2025-04-26 20:01:19'),
-(37, 64, 'Pendente', 'Cancelado', 'admin2', '2025-04-26 20:01:27'),
-(38, 61, 'Pendente', 'Cancelado', 'admin2', '2025-04-26 20:01:32'),
-(39, 66, 'Pendente', 'Cancelado', 'admin2', '2025-04-26 20:01:36'),
-(40, 67, 'Pendente', 'Cancelado', 'admin2', '2025-04-26 20:25:15'),
-(41, 70, 'Pendente', 'Entregue', 'admin2', '2025-04-26 20:29:59'),
-(42, 69, 'Pendente', 'Cancelado', 'admin2', '2025-04-26 20:34:06'),
-(43, 71, 'Pendente', 'Cancelado', 'admin2', '2025-04-26 20:41:18'),
-(44, 72, 'Pendente', 'Entregue', 'admin2', '2025-04-26 21:00:04');
 
 -- --------------------------------------------------------
 
@@ -390,8 +335,8 @@ CREATE TABLE `mesas` (
 INSERT INTO `mesas` (`id`, `id_mesa`, `nome`, `status`) VALUES
 (471, '1', '', '1'),
 (472, '2', '', '2'),
-(473, '3', '', '1'),
-(474, '4', '', '1'),
+(473, '3', '', '2'),
+(474, '4', '', '2'),
 (475, '5', '', '1'),
 (491, '6', '', '1'),
 (492, '7', '', '1'),
@@ -444,39 +389,6 @@ CREATE TABLE `pedido` (
   `cliente_id` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Despejando dados para a tabela `pedido`
---
-
-INSERT INTO `pedido` (`idpedido`, `idmesa`, `cliente`, `delivery`, `endereco_entrega`, `ponto_referencia`, `telefone_cliente`, `data`, `hora_pedido`, `hora_saida_entrega`, `hora_entrega`, `status`, `valor_total`, `taxa_entrega`, `forma_pagamento`, `troco_para`, `entregador_id`, `observacao`, `usuario_id`, `tipo`, `cliente_id`) VALUES
-(48, 1, NULL, 0, NULL, NULL, NULL, '2025-04-24', '13:07:12', NULL, NULL, 'Finalizado', 105.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(49, 2, NULL, 0, NULL, NULL, NULL, '2025-04-24', '13:07:42', NULL, NULL, 'Finalizado', 128.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(50, 11, NULL, 0, NULL, NULL, NULL, '2025-04-24', '16:11:22', NULL, NULL, 'Cancelado', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(51, 10, NULL, 0, NULL, NULL, NULL, '2025-04-24', '16:22:29', NULL, NULL, 'Finalizado', 74.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(52, 12, NULL, 0, NULL, NULL, NULL, '2025-04-24', '17:13:02', NULL, NULL, 'Finalizado', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(53, 0, '', 1, '', '', '54998887221', '2025-04-24', '17:39:10', NULL, NULL, 'Entregue', 0.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
-(54, 0, 'Moacir', 1, 'Rua joao', 'Concretos', '54998887221', '2025-04-24', '17:45:23', NULL, NULL, 'Pendente', 115.00, 10.00, 'Cartão - Débito', 0.00, NULL, NULL, NULL, 'mesa', NULL),
-(55, 0, 'Moacir', 1, 'Rua joao', 'Concretos', '54998887221', '2025-04-24', '18:00:37', NULL, NULL, 'Pendente', 120.00, 10.00, 'Cartão - Crédito', 0.00, NULL, NULL, NULL, 'mesa', NULL),
-(56, 0, '', 1, '', '', '54998887221', '2025-04-24', '18:25:32', NULL, NULL, 'Pendente', 100.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
-(57, NULL, 'Moacir', 1, '', '', '', '2025-04-26', '13:02:47', NULL, NULL, 'Cancelado', 100.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
-(58, 25, NULL, 0, NULL, NULL, NULL, '2025-04-26', '14:43:18', NULL, NULL, 'Finalizado', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(59, 10, NULL, 0, NULL, NULL, NULL, '2025-04-26', '15:18:50', NULL, NULL, 'Finalizado', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(60, 2, NULL, 0, NULL, NULL, NULL, '2025-04-26', '15:34:52', NULL, NULL, 'Finalizado', 55.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(61, NULL, 'Moacir k', 1, '', '', '', '2025-04-26', '15:37:59', NULL, NULL, 'Cancelado', 45.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
-(62, 9, NULL, 0, NULL, NULL, NULL, '2025-04-26', '15:38:42', NULL, NULL, 'Entregue', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(63, 3, NULL, 0, NULL, NULL, NULL, '2025-04-26', '16:18:37', NULL, NULL, 'Finalizado', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(64, 2, NULL, 0, NULL, NULL, NULL, '2025-04-26', '16:28:01', NULL, NULL, 'Cancelado', 40.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(65, 3, NULL, 0, NULL, NULL, NULL, '2025-04-26', '16:58:22', NULL, NULL, 'Cancelado', 180.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(66, NULL, 'Moacir k', 1, '', '', '', '2025-04-26', '16:59:03', NULL, NULL, 'Cancelado', 106.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
-(67, 10, NULL, 0, NULL, NULL, NULL, '2025-04-26', '17:02:23', NULL, NULL, 'Cancelado', 155.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(68, NULL, '', 1, '', '', '', '2025-04-26', '17:03:30', NULL, NULL, 'Pendente', 86.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
-(69, 2, NULL, 0, NULL, NULL, NULL, '2025-04-26', '17:27:03', NULL, NULL, 'Cancelado', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(70, 2, NULL, 0, NULL, NULL, NULL, '2025-04-26', '17:29:16', NULL, NULL, 'Entregue', 6.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(71, 15, NULL, 0, NULL, NULL, NULL, '2025-04-26', '17:39:05', NULL, NULL, 'Cancelado', 28.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(72, NULL, 'chaiane', 1, '', '', '', '2025-04-26', '17:46:08', NULL, NULL, 'Entregue', 46.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
-(73, 2, NULL, 0, NULL, NULL, NULL, '2025-04-26', '17:47:39', NULL, NULL, 'Pendente', 100.00, 0.00, NULL, NULL, NULL, NULL, NULL, 'mesa', NULL),
-(74, NULL, '', 1, '', '', '54998887221', '2025-04-26', '19:02:53', NULL, NULL, 'Pendente', 100.00, 0.00, '', 0.00, NULL, NULL, NULL, 'mesa', NULL),
-(75, NULL, '', 1, '', '', '54997092223', '2025-04-26', '19:06:21', NULL, NULL, 'Pendente', 110.00, 10.00, '', 0.00, NULL, NULL, NULL, 'mesa', 3);
 
 -- --------------------------------------------------------
 
@@ -490,37 +402,6 @@ CREATE TABLE `pedido_item_ingredientes` (
   `ingrediente_id` int NOT NULL,
   `incluido` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Despejando dados para a tabela `pedido_item_ingredientes`
---
-
-INSERT INTO `pedido_item_ingredientes` (`id`, `pedido_item_id`, `ingrediente_id`, `incluido`) VALUES
-(193, 72, 4, 1),
-(194, 72, 12, 0),
-(195, 72, 33, 0),
-(196, 74, 5, 0),
-(197, 76, 14, 0),
-(198, 78, 21, 1),
-(199, 78, 32, 0),
-(200, 80, 32, 0),
-(201, 81, 28, 0),
-(202, 81, 34, 1),
-(203, 82, 26, 0),
-(204, 83, 28, 0),
-(205, 84, 32, 0),
-(206, 85, 32, 0),
-(207, 85, 21, 1),
-(208, 87, 26, 0),
-(209, 87, 37, 1),
-(210, 88, 26, 0),
-(211, 89, 26, 0),
-(212, 90, 28, 0),
-(213, 94, 28, 0),
-(214, 96, 5, 0),
-(215, 96, 28, 0),
-(216, 98, 3, 1),
-(217, 100, 22, 1);
 
 -- --------------------------------------------------------
 
@@ -539,52 +420,6 @@ CREATE TABLE `pedido_itens` (
   `ingredientes_sem` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `ingredientes_com` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Despejando dados para a tabela `pedido_itens`
---
-
-INSERT INTO `pedido_itens` (`id`, `pedido_id`, `produto_id`, `quantidade`, `valor_unitario`, `valor_total`, `observacao`, `ingredientes_sem`, `ingredientes_com`) VALUES
-(72, 48, 30, 1, 90.00, 90.00, 'test', NULL, NULL),
-(73, 48, 59, 1, 15.00, 15.00, '', NULL, NULL),
-(74, 49, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(75, 49, 38, 1, 28.00, 28.00, '', NULL, NULL),
-(76, 50, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(77, 51, 45, 1, 28.00, 28.00, '', NULL, NULL),
-(78, 51, 35, 1, 40.00, 40.00, '', NULL, NULL),
-(79, 51, 51, 1, 6.00, 6.00, '', NULL, NULL),
-(80, 52, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(81, 53, 27, 1, 100.00, 100.00, 'Bem passado', NULL, NULL),
-(82, 53, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(83, 53, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(84, 53, 29, 1, 55.00, 55.00, '', NULL, NULL),
-(85, 54, 27, 1, 100.00, 100.00, 'Quente', NULL, NULL),
-(86, 54, 50, 1, 5.00, 5.00, 'Lima', NULL, NULL),
-(87, 55, 29, 1, 55.00, 55.00, 'teste', NULL, NULL),
-(88, 55, 29, 1, 55.00, 55.00, '', NULL, NULL),
-(89, 56, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(90, 57, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(91, 58, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(92, 59, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(93, 60, 29, 1, 55.00, 55.00, '', NULL, NULL),
-(94, 61, 38, 1, 28.00, 28.00, '', NULL, NULL),
-(95, 61, 58, 1, 17.00, 17.00, '', NULL, NULL),
-(96, 62, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(97, 63, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(98, 64, 35, 1, 40.00, 40.00, '', NULL, NULL),
-(99, 65, 30, 1, 90.00, 90.00, '', NULL, NULL),
-(100, 65, 30, 1, 90.00, 90.00, '', NULL, NULL),
-(101, 66, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(102, 66, 51, 1, 6.00, 6.00, '', NULL, NULL),
-(105, 68, 35, 1, 40.00, 40.00, '', NULL, NULL),
-(106, 68, 35, 1, 40.00, 40.00, '', NULL, NULL),
-(107, 68, 51, 1, 6.00, 6.00, '', NULL, NULL),
-(109, 70, 51, 1, 6.00, 6.00, '', NULL, NULL),
-(111, 72, 35, 1, 40.00, 40.00, '', NULL, NULL),
-(112, 72, 51, 1, 6.00, 6.00, '', NULL, NULL),
-(113, 73, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(114, 74, 27, 1, 100.00, 100.00, '', NULL, NULL),
-(115, 75, 27, 1, 100.00, 100.00, '', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -675,7 +510,7 @@ INSERT INTO `produtos` (`id`, `codigo`, `categoria_id`, `nome`, `descricao`, `pr
 (56, '8007', 8, 'REFRIGERANTE 600ML', NULL, 8.00, NULL, '2025-04-17 21:26:19', NULL),
 (57, '8008', 8, 'REFRIGERANTE 1L', NULL, 10.00, NULL, '2025-04-17 21:26:19', NULL),
 (58, '8009', 8, 'REFRIGERANTE 2L', NULL, 17.00, NULL, '2025-04-17 21:26:19', NULL),
-(59, '8010', 8, 'COCA-COLA 2L', NULL, 15.00, NULL, '2025-04-17 21:26:19', NULL),
+(59, '8010', 8, 'COCA-COLA 2L', '', 17.00, NULL, '2025-04-17 21:26:19', '680e71c41de88.png'),
 (60, '8011', 8, 'SUCO NATURAL', NULL, 9.00, NULL, '2025-04-17 21:26:19', NULL),
 (61, '9001', 9, 'CERVEJA LONG NECK', NULL, 10.00, NULL, '2025-04-17 21:26:19', NULL),
 (62, '9002', 9, 'CERVEJA 600ML', NULL, 17.00, NULL, '2025-04-17 21:26:19', NULL),
@@ -684,7 +519,7 @@ INSERT INTO `produtos` (`id`, `codigo`, `categoria_id`, `nome`, `descricao`, `pr
 (65, '9005', 9, 'TAÇA DE VINHO MOSCATO', NULL, 12.00, NULL, '2025-04-17 21:26:19', NULL),
 (66, '9006', 9, 'TAÇA DE VINHO MERLOT', NULL, 15.00, NULL, '2025-04-17 21:26:19', NULL),
 (79, '', 8, 'Suco Delvale', '', 10.00, NULL, '2025-04-24 18:15:51', '680a82a017935.jpg'),
-(80, NULL, 10, 'Combo', '', 65.00, NULL, '2025-04-26 17:09:40', '680d2485ec5b9.jpeg');
+(80, NULL, 10, 'Combo', 'Combo', 65.00, NULL, '2025-04-26 17:09:40', '680d2485ec5b9.jpeg');
 
 -- --------------------------------------------------------
 
@@ -1137,7 +972,7 @@ ALTER TABLE `categorias`
 -- AUTO_INCREMENT de tabela `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de tabela `despesas`
@@ -1155,7 +990,7 @@ ALTER TABLE `entregadores`
 -- AUTO_INCREMENT de tabela `estoque`
 --
 ALTER TABLE `estoque`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de tabela `ingredientes`
@@ -1167,7 +1002,7 @@ ALTER TABLE `ingredientes`
 -- AUTO_INCREMENT de tabela `log_pedidos`
 --
 ALTER TABLE `log_pedidos`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT de tabela `mesas`
@@ -1179,19 +1014,19 @@ ALTER TABLE `mesas`
 -- AUTO_INCREMENT de tabela `pedido`
 --
 ALTER TABLE `pedido`
-  MODIFY `idpedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
+  MODIFY `idpedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
 
 --
 -- AUTO_INCREMENT de tabela `pedido_item_ingredientes`
 --
 ALTER TABLE `pedido_item_ingredientes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=219;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `pedido_itens`
 --
 ALTER TABLE `pedido_itens`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=116;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=129;
 
 --
 -- AUTO_INCREMENT de tabela `perfil_estabelecimento`

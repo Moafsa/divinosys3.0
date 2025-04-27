@@ -488,15 +488,17 @@ $(document).on('click', 'a[href="MVC/VIEWS/perfil.php"]', function(e) {
   $('#perfil_logo_preview').attr('src', 'MVC/COMMON/img/logo-default.png');
   // Buscar dados do perfil via AJAX
   $.get('MVC/MODEL/get_perfil.php', function(data) {
-    if (data && data.success) {
-      $('#perfil_nome_estabelecimento').val(data.perfil.nome_estabelecimento || '');
-      $('#perfil_cnpj').val(data.perfil.cnpj || '');
-      $('#perfil_endereco').val(data.perfil.endereco || '');
-      $('#perfil_telefone').val(data.perfil.telefone || '');
-      $('#perfil_site').val(data.perfil.site || '');
-      $('#perfil_mensagem_header').val(data.perfil.mensagem_header || '');
-      if (data.perfil.logo) {
-        $('#perfil_logo_preview').attr('src', 'uploads/' + data.perfil.logo);
+    if (data && data.success && data.data) {
+      $('#perfil_nome_estabelecimento').val(data.data.nome_estabelecimento || '');
+      $('#perfil_cnpj').val(data.data.cnpj || '');
+      $('#perfil_endereco').val(data.data.endereco || '');
+      $('#perfil_telefone').val(data.data.telefone || '');
+      $('#perfil_site').val(data.data.site || '');
+      $('#perfil_mensagem_header').val(data.data.mensagem_header || '');
+      if (data.data.logo) {
+        $('#perfil_logo_preview').attr('src', 'MVC/UPLOADS/' + data.data.logo);
+      } else {
+        $('#perfil_logo_preview').attr('src', 'MVC/COMMON/img/logo-default.png');
       }
     }
   }, 'json');

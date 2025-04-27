@@ -15,7 +15,8 @@ $config = [
     'telefone' => $_POST['telefone'] ?? '',
     'site' => $_POST['site'] ?? '',
     'messages' => [
-        'header' => $_POST['mensagem_header'] ?? ''
+        'header' => $_POST['mensagem_header'] ?? '',
+        'footer' => $_POST['mensagem_footer'] ?? ''
     ]
 ];
 

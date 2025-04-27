@@ -1019,7 +1019,7 @@ console.log('Iniciando busca com termo:', search, 'categoria:', category);
                 $('#nomeCliente').val(cliente.nome || '');
                 $('#telefone').val(cliente.tel1 || '');
                 $('#endereco').val(cliente.endereco || '');
-                $('#referencia').val(cliente.referencia || '');
+                $('#referencia').val(cliente.ponto_referencia || '');
                 if ($('#bairro').length) $('#bairro').val(cliente.bairro || '');
                 if ($('#cidade').length) $('#cidade').val(cliente.cidade || '');
                 if ($('#estado').length) $('#estado').val(cliente.estado || '');
@@ -1385,7 +1385,7 @@ console.log('Iniciando busca com termo:', search, 'categoria:', category);
                     console.log('Resposta do servidor:', response);
                     if (response && response.success) {
                         if (dadosPedido.print_receipt && response.pedido_id) {
-                            window.open(`<?php echo $config->url("MVC/VIEWS/imprimir_pedido.php"); ?>?pedido_id=${response.pedido_id}`, '_blank');
+                            window.open(`<?php echo $config->url("MVC/VIEWS/imprimir_pedido_delivery.php"); ?>?pedido_id=${response.pedido_id}`, '_blank');
                         }
                         Swal.fire({
                             title: 'Sucesso!',

@@ -87,8 +87,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mysqli_stmt_bind_param($stmt_check, 'i', $id);
             mysqli_stmt_execute($stmt_check);
             $result_estoque = mysqli_stmt_get_result($stmt_check);
+            $estoque_row = mysqli_fetch_assoc($result_estoque);
 
-            if (mysqli_fetch_assoc($result_estoque)) {
+            if ($estoque_row) {
                 // Atualizar estoque existente
                 $sql_estoque = "UPDATE estoque SET 
                                estoque_atual = ?,
@@ -96,21 +97,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                preco_custo = ?,
                                marca = ?
                                WHERE produto_id = ?";
+                $stmt_estoque = mysqli_prepare($conn, $sql_estoque);
+                mysqli_stmt_bind_param($stmt_estoque, 'iidss', 
+                    $estoque_atual,
+                    $estoque_minimo,
+                    $preco_custo,
+                    $marca,
+                    $id
+                );
             } else {
                 // Criar novo registro de estoque
                 $sql_estoque = "INSERT INTO estoque 
                                (produto_id, estoque_atual, estoque_minimo, preco_custo, marca) 
                                VALUES (?, ?, ?, ?, ?)";
+                $stmt_estoque = mysqli_prepare($conn, $sql_estoque);
+                mysqli_stmt_bind_param($stmt_estoque, 'iidss', 
+                    $id,
+                    $estoque_atual,
+                    $estoque_minimo,
+                    $preco_custo,
+                    $marca
+                );
             }
-
-            $stmt_estoque = mysqli_prepare($conn, $sql_estoque);
-            mysqli_stmt_bind_param($stmt_estoque, 'iidss', 
-                $estoque_atual,
-                $estoque_minimo,
-                $preco_custo,
-                $marca,
-                $id
-            );
 
             if (!mysqli_stmt_execute($stmt_estoque)) {
                 throw new Exception("Erro ao atualizar estoque: " . mysqli_stmt_error($stmt_estoque));

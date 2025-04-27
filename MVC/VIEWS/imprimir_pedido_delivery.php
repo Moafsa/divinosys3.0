@@ -2,15 +2,14 @@
 session_start();
 require_once '../MODEL/conexao.php';
 
-// Verifica se o ID do pedido foi fornecido
 if (!isset($_GET['pedido_id'])) {
     die('ID do pedido não fornecido');
 }
 
-$pedido_id = $_GET['pedido_id'];
+$pedido_id = intval($_GET['pedido_id']);
 
 try {
-    // Busca informações do pedido e seus itens
+    // Buscar dados do pedido
     $stmt = $conn->prepare("
         SELECT 
             p.idpedido,
@@ -20,26 +19,28 @@ try {
             p.status,
             p.valor_total,
             p.observacao,
+            p.endereco_entrega,
+            p.taxa_entrega,
+            p.forma_pagamento,
+            p.troco_para,
+            p.ponto_referencia,
             m.nome as mesa_nome,
-            m.id_mesa as mesa_numero
+            m.id_mesa as mesa_numero,
+            c.nome as cliente_nome,
+            c.tel1 as cliente_tel,
+            c.endereco as cliente_endereco,
+            c.bairro as cliente_bairro,
+            c.cidade as cliente_cidade,
+            c.estado as cliente_estado
         FROM pedido p
         LEFT JOIN mesas m ON p.idmesa = m.id_mesa
+        LEFT JOIN clientes c ON p.cliente_id = c.id
         WHERE p.idpedido = ?
     ");
-    
-    if (!$stmt) {
-        throw new Exception("Erro ao preparar consulta: " . $conn->error);
-    }
-    
     $stmt->bind_param("i", $pedido_id);
-    
-    if (!$stmt->execute()) {
-        throw new Exception("Erro ao executar consulta: " . $stmt->error);
-    }
-    
+    $stmt->execute();
     $result = $stmt->get_result();
     $pedido = $result->fetch_assoc();
-
     if (!$pedido) {
         throw new Exception("Pedido não encontrado");
     }
@@ -69,21 +70,11 @@ try {
         WHERE pi.pedido_id = ?
         GROUP BY pi.id
     ");
-
-    if (!$stmt) {
-        throw new Exception("Erro ao preparar consulta de itens: " . $conn->error);
-    }
-
     $stmt->bind_param("i", $pedido_id);
-
-    if (!$stmt->execute()) {
-        throw new Exception("Erro ao executar consulta de itens: " . $stmt->error);
-    }
-
+    $stmt->execute();
     $result = $stmt->get_result();
     $itens = [];
     while ($item = $result->fetch_assoc()) {
-        // Processar ingredientes
         $ingredientes = [];
         if (!empty($item['ingredientes_str'])) {
             $ingredientes_array = explode('|', $item['ingredientes_str']);
@@ -96,8 +87,6 @@ try {
                 ];
             }
         }
-
-        // Formatar o item igual ao carrinho
         $itens[] = [
             'produto' => [
                 'id' => $item['id'],
@@ -110,61 +99,34 @@ try {
             'ingredientes' => $ingredientes
         ];
     }
-
 } catch (Exception $e) {
     die('Erro ao buscar dados: ' . $e->getMessage());
 }
 
-// Carregar configurações do estabelecimento
 $config = require_once __DIR__ . '/../CONFIG/estabelecimento.php';
-
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Cupom Fiscal - Pedido #<?php echo $pedido_id; ?></title>
+    <title>Cupom Delivery - Pedido #<?php echo $pedido_id; ?></title>
     <style>
-        @page {
-            margin: 0;
-        }
+        @page { margin: 0; }
         body {
             font-family: 'Courier New', monospace;
             margin: 0;
             padding: 10px;
-            width: <?php echo $config['printer']['width']; ?>mm;
+            width: <?php echo $config['printer']['width'] ?? 80; ?>mm;
             font-size: 12px;
             line-height: 1.2;
         }
-        .header, .footer {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .divider {
-            border-top: 1px dashed #000;
-            margin: 5px 0;
-        }
-        .info-block {
-            margin-bottom: 10px;
-        }
-        .item {
-            margin-bottom: 5px;
-        }
-        .total {
-            font-weight: bold;
-            text-align: right;
-            margin-top: 10px;
-        }
-        .small-text {
-            font-size: 10px;
-        }
-        @media print {
-            body {
-                width: 80mm;
-                margin: 0;
-                padding: 0;
-            }
-        }
+        .header, .footer { text-align: center; margin-bottom: 10px; }
+        .divider { border-top: 1px dashed #000; margin: 5px 0; }
+        .info-block { margin-bottom: 10px; }
+        .item { margin-bottom: 5px; }
+        .total { font-weight: bold; text-align: right; margin-top: 10px; }
+        .small-text { font-size: 10px; }
+        @media print { body { width: 80mm; margin: 0; padding: 0; } }
     </style>
 </head>
 <body>
@@ -178,18 +140,27 @@ $config = require_once __DIR__ . '/../CONFIG/estabelecimento.php';
         <br><?php echo $config['messages']['header']; ?>
         <?php endif; ?>
     </div>
-
     <div class="divider"></div>
-
     <div class="info-block">
-        CUPOM FISCAL<br>
+        <strong>CUPOM DELIVERY</strong><br>
         Pedido: #<?php echo str_pad($pedido_id, 6, '0', STR_PAD_LEFT); ?><br>
         Data: <?php echo date('d/m/Y', strtotime($pedido['data'])) . ' ' . $pedido['hora_pedido']; ?><br>
-        Mesa: <?php echo $pedido['mesa_numero']; ?>
+        <?php if (!empty($pedido['mesa_numero'])): ?>Mesa: <?php echo $pedido['mesa_numero']; ?><br><?php endif; ?>
+        <strong>Cliente:</strong> <?php echo htmlspecialchars($pedido['cliente_nome'] ?? ''); ?><br>
+        <strong>Telefone:</strong> <?php echo htmlspecialchars($pedido['cliente_tel'] ?? ''); ?><br>
+        <strong>Endereço:</strong> <?php echo htmlspecialchars($pedido['cliente_endereco'] ?? ''); ?><br>
+        <?php if (!empty($pedido['ponto_referencia'])): ?>
+        <strong>Referência:</strong> <?php echo htmlspecialchars($pedido['ponto_referencia']); ?><br>
+        <?php endif; ?>
+        <?php if (!empty($pedido['taxa_entrega'])): ?>
+        <strong>Taxa de Entrega:</strong> R$ <?php echo number_format($pedido['taxa_entrega'],2,',','.'); ?><br>
+        <?php endif; ?>
+        <?php if (!empty($pedido['forma_pagamento'])): ?>
+        <strong>Pagamento:</strong> <?php echo htmlspecialchars($pedido['forma_pagamento']); ?>
+        <?php if (!empty($pedido['troco_para'])): ?> (Troco para R$ <?php echo number_format($pedido['troco_para'],2,',','.'); ?>)<?php endif; ?><br>
+        <?php endif; ?>
     </div>
-
     <div class="divider"></div>
-
     <div class="items">
         <?php foreach ($itens as $item): ?>
         <div class="item">
@@ -227,15 +198,11 @@ $config = require_once __DIR__ . '/../CONFIG/estabelecimento.php';
         </div>
         <?php endforeach; ?>
     </div>
-
     <div class="divider"></div>
-
     <div class="total">
         TOTAL: R$ <?php echo number_format($pedido['valor_total'], 2, ',', '.'); ?>
     </div>
-
     <div class="divider"></div>
-
     <div class="footer">
         <?php echo $config['messages']['footer'] ?? ''; ?><br>
         <span class="small-text">
@@ -243,13 +210,9 @@ $config = require_once __DIR__ . '/../CONFIG/estabelecimento.php';
             PDV v1.0
         </span>
     </div>
-
     <script>
-        // Imprime automaticamente quando a página carregar
         window.onload = function() {
             window.print();
-            // Fecha a janela após a impressão (opcional)
-            // window.onafterprint = function() { window.close(); };
         };
     </script>
 </body>
