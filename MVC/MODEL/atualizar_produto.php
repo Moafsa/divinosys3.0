@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nome = mysqli_real_escape_string($conn, $_POST['nome']);
         $categoria_id = (int)$_POST['categoria_id'];
         $preco_normal = (float)str_replace(',', '.', $_POST['preco_normal']);
+        $preco_mini = isset($_POST['preco_mini']) && $_POST['preco_mini'] !== '' ? (float)str_replace(',', '.', $_POST['preco_mini']) : null;
         $descricao = mysqli_real_escape_string($conn, $_POST['descricao'] ?? '');
 
         // Verificar se o produto existe e obter imagem atual
@@ -57,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 nome = ?, 
                 categoria_id = ?, 
                 preco_normal = ?, 
+                preco_mini = ?,
                 descricao = ?,
                 imagem = ?
                 WHERE id = ?";
@@ -64,10 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = mysqli_prepare($conn, $sql);
 
         // Vincular os parâmetros
-        mysqli_stmt_bind_param($stmt, 'sidssi', 
+        mysqli_stmt_bind_param($stmt, 'siddssi', 
             $nome, 
             $categoria_id, 
             $preco_normal, 
+            $preco_mini,
             $descricao,
             $imagem,
             $id

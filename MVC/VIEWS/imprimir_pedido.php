@@ -53,6 +53,7 @@ try {
             pi.valor_unitario as preco,
             pi.valor_total,
             pi.observacao,
+            pi.tamanho,
             p.nome,
             GROUP_CONCAT(
                 CASE 
@@ -107,7 +108,8 @@ try {
             'quantidade' => $item['quantidade'],
             'observacao' => $item['observacao'],
             'valor_total' => $item['valor_total'],
-            'ingredientes' => $ingredientes
+            'ingredientes' => $ingredientes,
+            'tamanho' => $item['tamanho'] ?? 'normal'
         ];
     }
 
@@ -193,7 +195,13 @@ $config = require_once __DIR__ . '/../CONFIG/estabelecimento.php';
     <div class="items">
         <?php foreach ($itens as $item): ?>
         <div class="item">
-            <?php echo $item['quantidade']; ?>x <?php echo $item['produto']['nome']; ?><br>
+            <?php
+            $nomeProduto = $item['produto']['nome'];
+            if ((isset($item['tamanho']) && $item['tamanho'] === 'mini') && stripos($nomeProduto, 'mini ') !== 0) {
+                $nomeProduto = 'Mini ' . $nomeProduto;
+            }
+            ?>
+            <?php echo $item['quantidade']; ?>x <?php echo htmlspecialchars($nomeProduto); ?><br>
             <?php if (!empty($item['ingredientes'])): ?>
                 <span class="small-text">
                 <?php

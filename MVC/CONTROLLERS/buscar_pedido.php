@@ -36,7 +36,8 @@ while ($row = $result->fetch_assoc()) {
         'valor_total' => $row['valor_total'],
         'observacao' => $row['observacao'],
         'ingredientes_com' => $row['ingredientes_com'],
-        'ingredientes_sem' => $row['ingredientes_sem']
+        'ingredientes_sem' => $row['ingredientes_sem'],
+        'tamanho' => isset($row['tamanho']) ? $row['tamanho'] : 'normal'
     );
     
     error_log("Item processado: " . print_r($item, true));

@@ -209,6 +209,8 @@ try {
                 $valor_unitario = isset($item['produto']['preco']) ? floatval($item['produto']['preco']) : 0;
                 $valor_total_item = $valor_unitario * $quantidade;
                 $observacao = isset($item['observacao']) ? $item['observacao'] : '';
+                $tamanho = isset($item['tamanho']) ? $item['tamanho'] : 'normal';
+                error_log("[DEBUG] Salvando item do pedido delivery: produto_id={$produto_id}, quantidade={$quantidade}, tamanho={$tamanho}");
                 
                 $sql_item = "INSERT INTO pedido_itens (
                     pedido_id, 
@@ -216,21 +218,23 @@ try {
                     quantidade, 
                     valor_unitario, 
                     valor_total, 
-                    observacao
-                ) VALUES (?, ?, ?, ?, ?, ?)";
+                    observacao,
+                    tamanho
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
                 $stmt_item = mysqli_prepare($conn, $sql_item);
                 if (!$stmt_item) {
                     throw new Exception("Erro ao preparar inserção de item: " . mysqli_error($conn));
                 }
                 
-                mysqli_stmt_bind_param($stmt_item, 'iiddds', 
+                mysqli_stmt_bind_param($stmt_item, 'iidddss', 
                     $pedido_id, 
                     $produto_id, 
                     $quantidade, 
                     $valor_unitario, 
                     $valor_total_item, 
-                    $observacao
+                    $observacao,
+                    $tamanho
                 );
                 
                 if (!mysqli_stmt_execute($stmt_item)) {

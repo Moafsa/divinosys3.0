@@ -476,7 +476,7 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
                         Total: R$ <span id="cartTotal">0,00</span>
                     </div>
                     <div class="form-check mt-3">
-                        <input class="form-check-input" type="checkbox" id="printReceipt">
+                        <input class="form-check-input" type="checkbox" id="printReceipt" checked>
                         <label class="form-check-label" for="printReceipt">
                             Imprimir cupom fiscal
                         </label>
@@ -547,7 +547,22 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
                             <h5 id="produto-preco" class="text-primary"></h5>
                         </div>
                 </div>
-
+                <!-- Seleção de tamanho para XIS -->
+                <div class="row mb-3" id="tamanho-xis-row" style="display:none;">
+                    <div class="col-md-6">
+                        <label class="form-label">Size:</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="tamanho-xis" id="xis-normal" value="normal" checked>
+                                <label class="form-check-label" for="xis-normal">Normal</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="tamanho-xis" id="xis-mini" value="mini">
+                                <label class="form-check-label" for="xis-mini">Mini</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="quantidade" class="form-label">Quantidade:</label>
@@ -865,6 +880,13 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
                 $('#produto-preco').text('R$ ' + formatMoney(product.preco_normal || 0));
                 $('#quantidade').val(1);
                 $('#observacoes').val('');
+                // Exibir seleção de tamanho se for XIS e tiver preco_mini > 0
+                if ((product.categoria && product.categoria.toUpperCase() === 'XIS') && parseFloat(product.preco_mini) > 0) {
+                    $('#tamanho-xis-row').show();
+                    $('#xis-normal').prop('checked', true);
+                } else {
+                    $('#tamanho-xis-row').hide();
+                }
                 
                 // Limpar e mostrar loading nos ingredientes
                 $('#ingredientes-container').html('<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando ingredientes...</div>');
@@ -1009,8 +1031,18 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
                 }
             });
 
-            // Calcular preço total com adicionais
+            // --- NOVO: lógica de tamanho ---
+            let tamanho = 'normal';
+            let nomeProduto = produtoSelecionado.nome;
             let precoTotal = parseFloat(produtoSelecionado.preco_normal);
+            if ((produtoSelecionado.categoria && produtoSelecionado.categoria.toUpperCase() === 'XIS') && parseFloat(produtoSelecionado.preco_mini) > 0) {
+                tamanho = $("input[name='tamanho-xis']:checked").val();
+                if (tamanho === 'mini') {
+                    nomeProduto = 'Mini ' + nomeProduto;
+                    precoTotal = parseFloat(produtoSelecionado.preco_mini);
+                }
+            }
+            // Adicionais
             ingredientes.forEach(ing => {
                 if (ing.tipo === 'com' && ing.preco_adicional) {
                     precoTotal += parseFloat(ing.preco_adicional);
@@ -1023,13 +1055,14 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
                 mesa_id: mesaId,
                 produto: {
                     id: produtoSelecionado.id,
-                    nome: produtoSelecionado.nome,
+                    nome: nomeProduto,
                     preco: precoTotal
                 },
         quantidade: quantidade,
                 ingredientes: ingredientes,
                 observacao: observacao,
-                valor_total: precoTotal * quantidade
+                valor_total: precoTotal * quantidade,
+                tamanho: tamanho
             };
 
             console.log('Enviando item para o carrinho:', cartItem);
@@ -1099,12 +1132,17 @@ if ($mesa_id && isset($_SESSION['carrinho'][$mesa_id])) {
 
                 const observacaoHtml = item.observacao ? `<div class="text-muted small mt-1"><i class="fas fa-comment-alt"></i> ${item.observacao}</div>` : '';
 
+                let nomeProduto = item.produto.nome;
+                if (item.tamanho === 'mini' && !nomeProduto.toLowerCase().startsWith('mini ')) {
+                    nomeProduto = 'Mini ' + nomeProduto;
+                }
+
                 const itemHtml = `
                     <div class="cart-item">
                         <div class="d-flex justify-content-between align-items-start mb-1">
                             <div class="d-flex align-items-center">
                                 <span class="me-2">${item.quantidade}x</span>
-                                <span>${item.produto.nome}</span>
+                                <span>${nomeProduto}</span>
                             </div>
                             <div>R$ ${formatMoney(itemTotal)}</div>
                         </div>

@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nome = mysqli_real_escape_string($conn, $_POST['nome']);
         $categoria_id = (int)$_POST['categoria_id'];
         $preco_normal = (float)str_replace(',', '.', $_POST['preco_normal']);
+        $preco_mini = isset($_POST['preco_mini']) && $_POST['preco_mini'] !== '' ? (float)str_replace(',', '.', $_POST['preco_mini']) : null;
         $descricao = mysqli_real_escape_string($conn, $_POST['descricao'] ?? '');
         
         // Processar upload da imagem
@@ -34,11 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Preparar a query
-        $sql = "INSERT INTO produtos (nome, categoria_id, preco_normal, descricao, imagem) VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO produtos (nome, categoria_id, preco_normal, preco_mini, descricao, imagem) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($conn, $sql);
 
         // Vincular os parâmetros
-        mysqli_stmt_bind_param($stmt, 'sidss', $nome, $categoria_id, $preco_normal, $descricao, $imagem);
+        mysqli_stmt_bind_param($stmt, 'siddss', $nome, $categoria_id, $preco_normal, $preco_mini, $descricao, $imagem);
 
         // Executar a query
         if (mysqli_stmt_execute($stmt)) {

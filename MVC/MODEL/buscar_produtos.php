@@ -76,6 +76,7 @@ try {
         p.descricao,
         p.codigo,
         p.preco_normal,
+        p.preco_mini,
         p.imagem,
         c.nome as categoria_nome
     FROM produtos p
@@ -150,6 +151,7 @@ try {
     while ($row = mysqli_fetch_assoc($result)) {
         // Format prices
         $preco_normal = number_format((float)$row['preco_normal'], 2, '.', '');
+        $preco_mini = isset($row['preco_mini']) ? number_format((float)$row['preco_mini'], 2, '.', '') : null;
 
         // Build product array
         $produtos[] = [
@@ -158,6 +160,7 @@ try {
             'descricao' => $row['descricao'],
             'codigo' => $row['codigo'],
             'preco_normal' => $preco_normal,
+            'preco_mini' => $preco_mini,
             'imagem' => $row['imagem'] ? $config->url($row['imagem']) : null,
             'categoria' => $row['categoria_nome']
         ];

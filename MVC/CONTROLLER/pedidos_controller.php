@@ -26,6 +26,7 @@ class PedidosController {
                 i.valor_unitario,
                 i.valor_total as valor_item,
                 i.observacao,
+                i.tamanho,
                 i.id as item_id,
                 pr.nome as produto,
                 m.id_mesa,
@@ -60,7 +61,7 @@ class PedidosController {
                 $types .= "i";
             }
             
-            $query .= " GROUP BY p.idpedido, i.id, p.idmesa, p.cliente, p.delivery, p.data, p.hora_pedido, p.status, p.valor_total, p.observacao, p.usuario_id, i.quantidade, i.valor_unitario, i.valor_total, i.observacao, i.id, pr.nome, m.id_mesa ORDER BY p.data DESC, p.hora_pedido DESC LIMIT ? OFFSET ?";
+            $query .= " GROUP BY p.idpedido, i.id, p.idmesa, p.cliente, p.delivery, p.data, p.hora_pedido, p.status, p.valor_total, p.observacao, p.usuario_id, i.quantidade, i.valor_unitario, i.valor_total, i.observacao, i.tamanho, i.id, pr.nome, m.id_mesa ORDER BY p.data DESC, p.hora_pedido DESC LIMIT ? OFFSET ?";
             $params[] = $por_pagina;
             $params[] = $offset;
             $types .= "ii";

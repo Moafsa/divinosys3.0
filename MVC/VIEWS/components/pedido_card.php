@@ -66,7 +66,13 @@ switch ($status) {
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <span class="quantidade"><?php echo $item['quantidade']; ?>x</span>
-                    <span class="produto"><?php echo $item['produto']; ?></span>
+                    <?php
+                    $nomeProduto = $item['produto'];
+                    if ((isset($item['tamanho']) && $item['tamanho'] === 'mini') && stripos($nomeProduto, 'mini ') !== 0) {
+                        $nomeProduto = 'Mini ' . $nomeProduto;
+                    }
+                    ?>
+                    <span class="produto"><?php echo htmlspecialchars($nomeProduto); ?></span>
                 </div>
                 <div class="valor">
                     R$ <?php echo number_format($item['valor_total'], 2, ',', '.'); ?>

@@ -109,7 +109,7 @@ try {
         $pedido_id = mysqli_insert_id($conn);
 
         // Inserir itens do pedido
-        $sql_item = "INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, valor_unitario, valor_total, observacao) VALUES (?, ?, ?, ?, ?, ?)";
+        $sql_item = "INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, valor_unitario, valor_total, observacao, tamanho) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt_item = mysqli_prepare($conn, $sql_item);
         if (!$stmt_item) {
             throw new Exception("Erro ao preparar inserção de item: " . mysqli_error($conn));
@@ -127,6 +127,7 @@ try {
             $valor_unitario = floatval($item['produto']['preco']);
             $valor_total = $valor_unitario * $quantidade;
             $observacao = isset($item['observacao']) ? $item['observacao'] : '';
+            $tamanho = isset($item['tamanho']) ? $item['tamanho'] : 'normal';
             
             // Validar dados
             if ($produto_id <= 0) throw new Exception("ID do produto inválido");
@@ -135,7 +136,7 @@ try {
             
             error_log("Inserindo item: produto_id=$produto_id, quantidade=$quantidade, valor_unitario=$valor_unitario, valor_total=$valor_total, observacao=$observacao");
             
-            mysqli_stmt_bind_param($stmt_item, 'iiddds', $pedido_id, $produto_id, $quantidade, $valor_unitario, $valor_total, $observacao);
+            mysqli_stmt_bind_param($stmt_item, 'iidddss', $pedido_id, $produto_id, $quantidade, $valor_unitario, $valor_total, $observacao, $tamanho);
             
             if (!mysqli_stmt_execute($stmt_item)) {
                 throw new Exception("Erro ao inserir item do pedido: " . mysqli_stmt_error($stmt_item));

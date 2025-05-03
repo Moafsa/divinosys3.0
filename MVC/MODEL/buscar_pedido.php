@@ -80,7 +80,7 @@ try {
     }
 
     // Buscar itens do pedido
-    $query = "SELECT pi.*, p.nome as produto,
+    $query = "SELECT pi.*, p.nome as produto, pi.tamanho,
              GROUP_CONCAT(DISTINCT CASE WHEN pii.incluido = 1 THEN i.nome END) as ingredientes_com,
              GROUP_CONCAT(DISTINCT CASE WHEN pii.incluido = 0 THEN i.nome END) as ingredientes_sem
              FROM pedido_itens pi 

@@ -14,7 +14,17 @@ if (!isset($_POST['idpedido']) || empty($_POST['idpedido'])) {
 require_once '../MODEL/conexao.php';
 
 try {
+    file_put_contents('/tmp/excluir_pedido_debug.log', date('c')." POST: ".print_r($_POST, true), FILE_APPEND);
     $idpedido = (int)$_POST['idpedido'];
+    
+    // Buscar id da mesa antes de deletar o pedido
+    $query = "SELECT idmesa FROM pedido WHERE idpedido = ?";
+    $stmt = mysqli_prepare($conn, $query);
+    mysqli_stmt_bind_param($stmt, "i", $idpedido);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($result);
+    $idmesa = $row ? (int)$row['idmesa'] : null;
     
     // Iniciar transação
     mysqli_begin_transaction($conn);
@@ -39,6 +49,14 @@ try {
     mysqli_stmt_bind_param($stmt, "i", $idpedido);
     mysqli_stmt_execute($stmt);
     
+    // Atualizar status da mesa para Livre (1) se idmesa encontrado
+    if ($idmesa) {
+        $query = "UPDATE mesas SET status = 1 WHERE id_mesa = ?";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "i", $idmesa);
+        mysqli_stmt_execute($stmt);
+    }
+    
     // Commit da transação
     mysqli_commit($conn);
     
@@ -48,7 +66,7 @@ try {
     // Rollback em caso de erro
     mysqli_rollback($conn);
     error_log("Erro ao excluir pedido: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Erro ao excluir pedido']);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 } finally {
     if (isset($stmt)) {
         mysqli_stmt_close($stmt);

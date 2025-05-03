@@ -12,25 +12,50 @@ services:
       MYSQL_PASSWORD: divino123
       MYSQL_ROOT_PASSWORD: root123
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./pdv_db.sql:/docker-entrypoint-initdb.d/init.sql
     command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - divinosys-network
+
+  # Web Application
+  web:
+    build: .
+    container_name: divinosys-web
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - db
+    networks:
+      - divinosys-network
 
   # phpMyAdmin
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
+    image: phpmyadmin:5.2.1-apache
     container_name: divinosys-phpmyadmin
     restart: always
     ports:
-      - "8083:80"
+      - "8084:80"
     environment:
+      - PMA_ARBITRARY=1
       - PMA_HOST=db
-      - PMA_PORT=3306
-      - MYSQL_ROOT_PASSWORD=root123
+      - PMA_USER=root
+      - PMA_PASSWORD=root123
+      - UPLOAD_LIMIT=300M
     depends_on:
       - db
+    networks:
+      - divinosys-network
+
+networks:
+  divinosys-network:
+    driver: bridge
 
 volumes:
   mysql_data: 

@@ -439,6 +439,9 @@ unset($pedidos_status);
                                                     <span class="produto-nome">
                                                         <?php 
                                                         $nome_produto = $item['produto'];
+                                                        if (isset($item['tamanho']) && strtolower($item['tamanho']) === 'mini' && stripos($nome_produto, 'mini ') !== 0) {
+                                                            $nome_produto = 'Mini ' . $nome_produto;
+                                                        }
                                                         if (strpos($nome_produto, '(') === false && isset($item['pessoas']) && $item['pessoas'] > 0) {
                                                             $nome_produto .= " ({$item['pessoas']} PESSOAS)";
                                                         }
@@ -505,6 +508,9 @@ unset($pedidos_status);
                                             <?php if (!in_array($status, ['Entregue (Mesa)', 'Entregue (Delivery)'])): ?>
                                                 <button class="btn btn-sm btn-danger ms-2" onclick="atualizarStatus(<?php echo $pedido_id; ?>, 'Cancelado')">
                                                     <i class="fas fa-times me-1"></i> Cancelar
+                                                </button>
+                                                <button class="btn btn-sm btn-danger ms-2 btn-excluir-pedido" onclick="excluirPedido(<?php echo $pedido_id; ?>, event)">
+                                                    <i class="fas fa-trash"></i> Excluir
                                                 </button>
                                             <?php endif; ?>
                                         </div>
@@ -592,6 +598,25 @@ unset($pedidos_status);
         }
         setInterval(atualizarTemposDecorridos, 1000);
         document.addEventListener('DOMContentLoaded', atualizarTemposDecorridos);
+
+        function excluirPedido(pedidoId, event) {
+            event.stopPropagation();
+            if (!confirm('Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.')) return;
+            fetch('MVC/CONTROLLER/excluir_pedido.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+                body: `idpedido=${pedidoId}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erro ao excluir pedido: ' + (data.message || 'Erro desconhecido'));
+                }
+            })
+            .catch(() => alert('Erro ao excluir pedido.'));
+        }
     </script>
 </body>
 </html> 

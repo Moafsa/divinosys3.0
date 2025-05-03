@@ -31,6 +31,10 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
             font-size: 0.8rem;
             padding: 0.3rem 0.5rem;
         }
+        #salesChart {
+            max-height: 220px !important;
+            height: 220px !important;
+        }
     </style>
 </head>
 <body>
@@ -107,7 +111,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     <div class="card mb-4">
         <div class="card-body">
             <h5 class="card-title">Daily Sales</h5>
-            <canvas id="salesChart"></canvas>
+            <canvas id="salesChart" style="max-height:220px;height:220px;"></canvas>
         </div>
     </div>
 
@@ -220,6 +224,73 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
             </div>
         </div>
     </div>
+
+    <!-- Agrupamento por Mesa -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Pedidos por Mesa</h5>
+            <?php 
+            $total_geral = 0;
+            $pedidos_por_mesa = [];
+            foreach ($orders as $order) {
+                $mesa = $order['table_number'] ?? 'Sem Mesa';
+                if (!isset($pedidos_por_mesa[$mesa])) $pedidos_por_mesa[$mesa] = [];
+                $pedidos_por_mesa[$mesa][] = $order;
+                $total_geral += $order['total_amount'];
+            }
+            ?>
+            <?php foreach ($pedidos_por_mesa as $mesa => $pedidos): ?>
+                <div class="mb-3 p-2 border rounded bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong>Mesa <?php echo htmlspecialchars($mesa); ?></strong>
+                        <span class="fw-bold">Total: R$ <?php echo number_format(array_sum(array_column($pedidos, 'total_amount')), 2, ',', '.'); ?></span>
+                    </div>
+                    <div class="table-responsive mt-2">
+                        <table class="table table-sm table-bordered mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Pedido</th>
+                                    <th>Status</th>
+                                    <th>Data</th>
+                                    <th>Hora</th>
+                                    <th>Valor</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($pedidos as $pedido): ?>
+                                <tr>
+                                    <td>#<?php echo $pedido['order_id']; ?></td>
+                                    <td><span class="badge status-badge bg-<?php 
+                                        echo $pedido['status'] == 'Completed' ? 'success' : 
+                                            ($pedido['status'] == 'Pending' ? 'warning' : ($pedido['status'] == 'Cancelled' ? 'danger' : 'info')); 
+                                    ?>"><?php echo $pedido['status']; ?></span></td>
+                                    <td><?php echo date('d/m/Y', strtotime($pedido['date'])); ?></td>
+                                    <td><?php echo $pedido['order_time']; ?></td>
+                                    <td>R$ <?php echo number_format($pedido['total_amount'], 2, ',', '.'); ?></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" onclick="verPedido(<?php echo $pedido['order_id']; ?>)"><i class="fas fa-eye"></i> Ver Pedido</button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+            <div class="mt-3 text-end">
+                <strong>Total Geral: R$ <?php echo number_format($total_geral, 2, ',', '.'); ?></strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Pedido -->
+<div id="pedidoModal" class="pedido-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div class="pedido-modal-content" style="background:#fff;max-width:600px;width:90vw;margin:auto;position:relative;top:10vh;border-radius:8px;padding:20px;">
+        <span class="close-modal" onclick="fecharModal()" style="position:absolute;right:20px;top:20px;font-size:24px;cursor:pointer;">&times;</span>
+        <div id="pedidoConteudo"></div>
+    </div>
 </div>
 
 <!-- Scripts -->
@@ -325,6 +396,79 @@ function exportToExcel() {
 
     // Open in new tab to prevent navigation issues
     window.open(url, '_blank');
+}
+
+function verPedido(pedidoId) {
+    const modal = document.getElementById('pedidoModal');
+    const conteudo = document.getElementById('pedidoConteudo');
+    fetch(`MVC/MODEL/buscar_pedido.php?pedido_id=${pedidoId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                let html = `<div class='pedido-card expanded'><div class='pedido-header'><div><strong>Pedido #${pedidoId}</strong><div class='text-muted'>${data.pedido.data} ${data.pedido.hora_pedido}</div><div class='text-muted'>Mesa: ${data.pedido.idmesa}</div><div class='text-muted'>Status: ${data.pedido.status}</div></div></div><div class='pedido-content' style='display: block;'>`;
+                data.itens.forEach(item => {
+                    let nomeProduto = item.produto;
+                    if (item.tamanho && item.tamanho.toLowerCase() === 'mini' && !nomeProduto.toLowerCase().startsWith('mini ')) {
+                        nomeProduto = 'Mini ' + nomeProduto;
+                    }
+                    html += `<div class='item-pedido'><div class='produto-linha'><div class='produto-info'><span class='produto-nome'>${item.quantidade}x ${nomeProduto}</span></div><div>R$ ${parseFloat(item.valor_total || (item.quantidade * item.valor_unitario)).toFixed(2)}</div></div><div class='detalhes-pedido'>`;
+                    if (item.ingredientes_sem) {
+                        const ingredientesSem = typeof item.ingredientes_sem === 'string' ? item.ingredientes_sem.split(',').map(i => i.trim()).filter(i => i) : Array.isArray(item.ingredientes_sem) ? item.ingredientes_sem : [];
+                        if (ingredientesSem.length > 0) {
+                            html += `<div class='ingredientes-container'><div class='ingredientes text-danger'><i class='fas fa-minus-circle'></i><span>SEM: ${ingredientesSem.join(', ')}</span></div></div>`;
+                        }
+                    }
+                    if (item.ingredientes_com) {
+                        const ingredientesCom = typeof item.ingredientes_com === 'string' ? item.ingredientes_com.split(',').map(i => i.trim()).filter(i => i) : Array.isArray(item.ingredientes_com) ? item.ingredientes_com : [];
+                        if (ingredientesCom.length > 0) {
+                            html += `<div class='ingredientes-container'><div class='ingredientes text-success'><i class='fas fa-plus-circle'></i><span>COM: ${ingredientesCom.join(', ')}</span></div></div>`;
+                        }
+                    }
+                    if (item.observacao && item.observacao.trim()) {
+                        html += `<div class='observacao'><i class='fas fa-info-circle'></i><span>Observação: ${item.observacao}</span></div>`;
+                    }
+                    html += `</div></div>`;
+                });
+                html += `<div class='valor-total'>Total: R$ ${parseFloat(data.pedido.valor_total).toFixed(2)}</div>`;
+                html += `<div class='mt-3 text-end'>
+                    <button class='btn btn-secondary btn-sm me-2' onclick='imprimirPedido(${pedidoId})'><i class='fas fa-print'></i> Imprimir Pedido</button>
+                    <button class='btn btn-danger btn-sm' onclick='excluirPedido(${pedidoId})'><i class='fas fa-trash'></i> Excluir Pedido</button>
+                </div>`;
+                html += `</div></div>`;
+                conteudo.innerHTML = html;
+                modal.style.display = 'flex';
+            } else {
+                alert('Erro ao carregar pedido');
+            }
+        })
+        .catch(() => alert('Erro ao carregar pedido.'));
+}
+
+function imprimirPedido(pedidoId) {
+    window.open(`MVC/VIEWS/imprimir_pedido.php?pedido_id=${pedidoId}`, '_blank');
+}
+
+function excluirPedido(pedidoId) {
+    if (!confirm('Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.')) return;
+    fetch('MVC/CONTROLLER/excluir_pedido.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+        body: `idpedido=${pedidoId}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            fecharModal();
+            location.reload();
+        } else {
+            alert('Erro ao excluir pedido: ' + (data.message || 'Erro desconhecido'));
+        }
+    })
+    .catch(() => alert('Erro ao excluir pedido.'));
+}
+
+function fecharModal() {
+    document.getElementById('pedidoModal').style.display = 'none';
 }
 </script>
 

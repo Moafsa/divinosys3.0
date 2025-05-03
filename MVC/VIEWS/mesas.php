@@ -7,36 +7,36 @@ if (!isset($_SESSION["login"]) || $_SESSION["login"] != 1) {
 
 $config = Config::getInstance();
 
-// Buscar mesas e o último pedido de cada mesa (incluindo entregues)
-$query = "SELECT m.*, 
-    (
-        SELECT p1.idpedido FROM pedido p1 WHERE p1.idmesa = m.id_mesa ORDER BY p1.data DESC, p1.hora_pedido DESC LIMIT 1
-    ) as idpedido,
-    (
-        SELECT p1.valor_total FROM pedido p1 WHERE p1.idmesa = m.id_mesa ORDER BY p1.data DESC, p1.hora_pedido DESC LIMIT 1
-    ) as valor_total,
-    (
-        SELECT p1.data FROM pedido p1 WHERE p1.idmesa = m.id_mesa ORDER BY p1.data DESC, p1.hora_pedido DESC LIMIT 1
-    ) as data,
-    (
-        SELECT p1.hora_pedido FROM pedido p1 WHERE p1.idmesa = m.id_mesa ORDER BY p1.data DESC, p1.hora_pedido DESC LIMIT 1
-    ) as hora_pedido,
-    (
-        SELECT p1.status FROM pedido p1 WHERE p1.idmesa = m.id_mesa ORDER BY p1.data DESC, p1.hora_pedido DESC LIMIT 1
-    ) as status_pedido
-FROM mesas m
-ORDER BY m.id_mesa";
+// Buscar todos os pedidos abertos agrupados por mesa
+$query = "SELECT m.id_mesa, m.nome, m.status as mesa_status,
+               p.idpedido, p.valor_total, p.status as pedido_status, p.data, p.hora_pedido
+        FROM mesas m
+        LEFT JOIN pedido p ON m.id_mesa = p.idmesa AND p.status NOT IN ('Finalizado', 'Cancelado')
+        ORDER BY m.id_mesa ASC, p.data ASC, p.hora_pedido ASC";
 $result = mysqli_query($conn, $query);
 
-// Carregar todas as mesas em array para ordenar numericamente
-$mesas_array = array();
-while ($row = mysqli_fetch_assoc($result)) {
-    $mesas_array[] = $row;
+$mesas_pedidos = array();
+while($row = mysqli_fetch_assoc($result)) {
+    $id_mesa = $row['id_mesa'];
+    if (!isset($mesas_pedidos[$id_mesa])) {
+        $mesas_pedidos[$id_mesa] = [
+            'nome' => $row['nome'],
+            'mesa_status' => $row['mesa_status'],
+            'pedidos' => []
+        ];
+    }
+    if ($row['idpedido']) {
+        $mesas_pedidos[$id_mesa]['pedidos'][] = [
+            'idpedido' => $row['idpedido'],
+            'valor_total' => $row['valor_total'],
+            'status' => $row['pedido_status'],
+            'data' => $row['data'],
+            'hora_pedido' => $row['hora_pedido']
+        ];
+    }
 }
 // Ordenar mesas numericamente
-usort($mesas_array, function($a, $b) {
-    return (int)$a['id_mesa'] <=> (int)$b['id_mesa'];
-});
+uksort($mesas_pedidos, function($a, $b) { return (int)$a - (int)$b; });
 
 // Array para armazenar os itens dos pedidos
 $itens_pedidos = array();
@@ -228,85 +228,41 @@ if (!empty($pedidos_ids)) {
     <h1 class="h3 mb-4 text-gray-800">Gerenciamento de Mesas</h1>
     
     <div class="row">
-        <?php foreach ($mesas_array as $mesa): 
-            $status_class = '';
-            $status_map = [
-                '1' => 'Livre',
-                '2' => 'Ocupada',
-                '3' => 'Atendendo',
-                'Livre' => 'Livre',
-                'Ocupada' => 'Ocupada',
-                'Atendendo' => 'Atendendo',
-            ];
-            // Novo: status textual baseado no status do pedido
-            if (!empty($mesa['status_pedido'])) {
-                switch ($mesa['status_pedido']) {
-                    case 'Entregue':
-                    case 'Entregue (Mesa)':
-                        $status_text = 'Entregue';
-                        $status_class = 'mesa-entregue';
-                        break;
-                    case 'Cancelado':
-                    case 'Finalizado':
-                        $status_text = 'Livre';
-                        $status_class = 'mesa-livre';
-                        break;
-                    default:
-                        $status_text = isset($status_map[$mesa['status']]) ? $status_map[$mesa['status']] : $mesa['status'];
-                        $status_class = ($status_text === 'Livre') ? 'mesa-livre' : (($status_text === 'Ocupada') ? 'mesa-ocupada' : 'mesa-atendendo');
-                }
-            } else {
-                $status_text = isset($status_map[$mesa['status']]) ? $status_map[$mesa['status']] : $mesa['status'];
-                $status_class = ($status_text === 'Livre') ? 'mesa-livre' : (($status_text === 'Ocupada') ? 'mesa-ocupada' : 'mesa-atendendo');
-            }
+        <?php foreach ($mesas_pedidos as $id_mesa => $mesa):
+            $tem_pedidos = count($mesa['pedidos']) > 0;
+            $status_class = $tem_pedidos ? 'mesa-ocupada' : 'mesa-livre';
+            $status_text = $tem_pedidos ? 'Ocupada' : 'Livre';
         ?>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card shadow h-100 py-2 mesa-card <?php echo $status_class; ?>">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    Mesa <?php echo $mesa["id_mesa"]; ?>
-                                </div>
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Status: <?php echo $status_text; ?>
-                                </div>
-                                <?php if ($status_text === 'Ocupada' || $status_text === 'Entregue'): ?>
-                                    <?php if ($mesa['idpedido']): ?>
-                                        <div class="text-xs text-muted mt-2">
-                                            Pedido #<?php echo $mesa['idpedido']; ?><br>
-                                            <?php echo date('d/m/Y H:i', strtotime($mesa['data'] . ' ' . $mesa['hora_pedido'])); ?><br>
-                                            R$ <?php echo number_format($mesa['valor_total'], 2, ',', '.'); ?>
-                                        </div>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-                            </div>
-                            <div class="col-auto">
-                                <?php if ($status_text === 'Ocupada' && $mesa['idpedido']): ?>
-                                    <button onclick="verPedido(<?php echo $mesa['idpedido']; ?>)" 
-                                            class="btn btn-info btn-sm mb-2">
-                                        <i class="fas fa-eye"></i> Ver Pedido
-                                    </button>
-                                    <br>
-                                    <button onclick="fecharPedido(<?php echo $mesa['idpedido']; ?>)" 
-                                            class="btn btn-success btn-sm">
-                                        <i class="fas fa-check-circle"></i> Fechar Pedido
-                                    </button>
-                                <?php elseif ($status_text === 'Entregue' && $mesa['idpedido']): ?>
-                                    <button onclick="verPedido(<?php echo $mesa['idpedido']; ?>)" 
-                                            class="btn btn-info btn-sm mb-2">
-                                        <i class="fas fa-eye"></i> Ver Pedido
-                                    </button>
-                                <?php endif; ?>
-                                <a href="<?php echo $config->url("?view=gerar_pedido&mesa=" . $mesa["id_mesa"]); ?>" 
-                                   class="btn btn-primary btn-sm mt-2">
-                                    <i class="fas fa-plus-circle"></i> Fazer Pedido
-                                </a>
-                            </div>
-                        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow h-100 py-2 mesa-card <?php echo $status_class; ?>">
+                <div class="card-body">
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                        Mesa <?php echo $id_mesa; ?>
                     </div>
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                        Status: <?php echo $status_text; ?>
+                    </div>
+                    <?php if ($tem_pedidos): ?>
+                        <div class="mb-2">
+                            <?php $total = 0; foreach($mesa['pedidos'] as $pedido): $total += $pedido['valor_total']; ?>
+                                <div class="d-flex justify-content-between align-items-center mb-1 bg-light text-dark rounded px-2 py-1">
+                                    <span>Pedido #<?php echo $pedido['idpedido']; ?></span>
+                                    <span>R$ <?php echo number_format($pedido['valor_total'], 2, ',', '.'); ?></span>
+                                    <button class="btn btn-info btn-sm ms-2" onclick="verPedido(<?php echo $pedido['idpedido']; ?>)">
+                                        <i class="fas fa-eye"></i> Ver Pedido
+                                    </button>
+                                </div>
+                            <?php endforeach; ?>
+                            <div class="fw-bold mt-2">Total: R$ <?php echo number_format($total, 2, ',', '.'); ?></div>
+                            <button class="btn btn-success btn-sm mt-2" onclick="fecharTodosPedidos(<?php echo $id_mesa; ?>)"><i class="fas fa-check"></i> Fechar Todos</button>
+                        </div>
+                    <?php endif; ?>
+                    <a href="<?php echo $config->url("?view=gerar_pedido&mesa=") . $id_mesa; ?>" class="btn btn-primary btn-sm mt-2">
+                        <i class="fas fa-plus-circle"></i> Fazer Pedido
+                    </a>
                 </div>
             </div>
+        </div>
         <?php endforeach; ?>
     </div>
 </div>
@@ -393,18 +349,24 @@ function verPedido(pedidoId) {
                                     <button onclick="imprimirPedido(${pedidoId})" class="btn btn-secondary btn-sm ms-2">
                                         <i class="fas fa-print"></i> Imprimir Pedido
                                     </button>
+                                    <button onclick="excluirPedido(${pedidoId})" class="btn btn-danger btn-sm ms-2">
+                                        <i class="fas fa-trash"></i> Excluir
+                                    </button>
                                 </div>
                             </div>
                         </div>
                         <div class="pedido-content" style="display: block;">`;
                 
                 data.itens.forEach(item => {
-                    console.log('Processando item:', item);
+                    let nomeProduto = item.produto;
+                    if (item.tamanho && item.tamanho.toLowerCase() === 'mini' && !nomeProduto.toLowerCase().startsWith('mini ')) {
+                        nomeProduto = 'Mini ' + nomeProduto;
+                    }
                     html += `
                         <div class="item-pedido">
                             <div class="produto-linha">
                                 <div class="produto-info">
-                                    <span class="produto-nome">${item.quantidade}x ${item.produto}</span>
+                                    <span class="produto-nome">${item.quantidade}x ${nomeProduto}</span>
                                 </div>
                                 <div>
                                     R$ ${parseFloat(item.valor_total || (item.quantidade * item.valor_unitario)).toFixed(2)}
@@ -628,5 +590,41 @@ window.onclick = function(event) {
 // Adicionar função de impressão
 function imprimirPedido(pedidoId) {
     window.open(`MVC/VIEWS/imprimir_pedido.php?pedido_id=${pedidoId}`, '_blank');
+}
+
+function excluirPedido(pedidoId) {
+    if (!confirm('Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.')) return;
+    fetch('MVC/CONTROLLER/excluir_pedido.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+        body: `idpedido=${pedidoId}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Erro ao excluir pedido: ' + (data.message || 'Erro desconhecido'));
+        }
+    })
+    .catch(() => alert('Erro ao excluir pedido.'));
+}
+
+function fecharTodosPedidos(idMesa) {
+    if (!confirm('Tem certeza que deseja fechar todos os pedidos abertos desta mesa?')) return;
+    fetch('MVC/MODEL/fechar_todos_pedidos.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `id_mesa=${idMesa}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Erro ao fechar pedidos: ' + (data.message || 'Erro desconhecido'));
+        }
+    })
+    .catch(() => alert('Erro ao fechar pedidos.'));
 }
 </script>

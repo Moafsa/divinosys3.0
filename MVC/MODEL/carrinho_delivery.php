@@ -63,7 +63,8 @@ try {
                 'quantidade' => $data['quantidade'],
                 'ingredientes' => isset($data['ingredientes']) ? $data['ingredientes'] : [],
                 'observacao' => isset($data['observacao']) ? $data['observacao'] : '',
-                'valor_total' => $data['valor_total']
+                'valor_total' => $data['valor_total'],
+                'tamanho' => isset($data['tamanho']) ? $data['tamanho'] : null
             ];
 
             echo json_encode([

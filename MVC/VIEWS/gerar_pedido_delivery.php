@@ -567,7 +567,7 @@ if (isset($_SESSION['carrinho_delivery'])) {
                         <strong>Total: R$ <span id="cartTotal">0,00</span></strong>
                     </div>
                     <div class="form-check mt-3">
-                        <input class="form-check-input" type="checkbox" id="printReceipt">
+                        <input class="form-check-input" type="checkbox" id="printReceipt" checked>
                         <label class="form-check-label" for="printReceipt">
                             Imprimir cupom fiscal
                         </label>
@@ -646,6 +646,22 @@ if (isset($_SESSION['carrinho_delivery'])) {
                         </div>
                     </div>
                     
+                    <div class="row mb-3" id="tamanho-xis-row" style="display:none;">
+                        <div class="col-md-6">
+                            <label class="form-label">Size:</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="tamanho-xis" id="xis-normal" value="normal" checked>
+                                    <label class="form-check-label" for="xis-normal">Normal</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="tamanho-xis" id="xis-mini" value="mini">
+                                    <label class="form-check-label" for="xis-mini">Mini</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <h5>Ingredientes</h5>
                         <div id="ingredientes-container">
@@ -1146,6 +1162,14 @@ console.log('Iniciando busca com termo:', search, 'categoria:', category);
                     $('#ingredientes-container').html('<p class="text-muted">Nenhum ingrediente disponível para este produto</p>');
                 }
                 
+                // Exibir seleção de tamanho se for XIS e tiver preco_mini > 0
+                if ((product.categoria && product.categoria.toUpperCase() === 'XIS') && parseFloat(product.preco_mini) > 0) {
+                    $('#tamanho-xis-row').show();
+                    $('#xis-normal').prop('checked', true);
+                } else {
+                    $('#tamanho-xis-row').hide();
+                }
+                
                 // Mostrar o modal
                 $('#produtoModal').modal('show');
                 
@@ -1202,7 +1226,16 @@ console.log('Iniciando busca com termo:', search, 'categoria:', category);
             const ingredientes = getSelectedIngredients();
 
             // Calcular preço total com adicionais
+            let tamanho = 'normal';
+            let nomeProduto = currentProduct.nome;
             let precoTotal = parseFloat(currentProduct.preco_normal);
+            if ((currentProduct.categoria && currentProduct.categoria.toUpperCase() === 'XIS') && parseFloat(currentProduct.preco_mini) > 0) {
+                tamanho = $("input[name='tamanho-xis']:checked").val();
+                if (tamanho === 'mini') {
+                    nomeProduto = 'Mini ' + nomeProduto;
+                    precoTotal = parseFloat(currentProduct.preco_mini);
+                }
+            }
             ingredientes.forEach(ing => {
                 if (ing.tipo === 'com' && ing.preco_adicional) {
                     precoTotal += parseFloat(ing.preco_adicional);
@@ -1214,13 +1247,14 @@ console.log('Iniciando busca com termo:', search, 'categoria:', category);
             const cartItem = {
                 produto: {
                     id: currentProduct.id,
-                    nome: currentProduct.nome,
+                    nome: nomeProduto,
                     preco: precoTotal
                 },
                 quantidade: quantidade,
                 ingredientes: ingredientes,
                 observacao: observacao,
-                valor_total: precoTotal * quantidade
+                valor_total: precoTotal * quantidade,
+                tamanho: tamanho
             };
 
             $.ajax({
@@ -1234,8 +1268,6 @@ console.log('Iniciando busca com termo:', search, 'categoria:', category);
                         updateCartUI();
                         $('#produtoModal').modal('hide');
                         showSuccess('Item adicionado ao pedido');
-                        
-                        // Limpar seleções
                         $('#quantidade').val(1);
                         $('#observacoes').val('');
                         $('.ingredient-toggle').removeClass('excluded included');
@@ -1268,13 +1300,10 @@ console.log('Iniciando busca com termo:', search, 'categoria:', category);
                 const itemTotal = item.valor_total || (item.produto.preco * item.quantidade);
                 subtotal += itemTotal;
 
-                // Formatar ingredientes
                 let ingredientesHtml = '';
                 if (item.ingredientes && Array.isArray(item.ingredientes)) {
-                    console.log('Ingredientes do item:', item.ingredientes);
                     const removidos = item.ingredientes.filter(i => i.tipo === 'sem').map(i => i.nome);
                     const adicionados = item.ingredientes.filter(i => i.tipo === 'com').map(i => i.nome);
-                        
                     if (removidos.length > 0) {
                         ingredientesHtml += `<div class="text-danger small mt-1">Sem: ${removidos.join(', ')}</div>`;
                     }
@@ -1285,12 +1314,17 @@ console.log('Iniciando busca com termo:', search, 'categoria:', category);
 
                 const observacaoHtml = item.observacao ? `<div class="text-muted small mt-1"><i class="fas fa-comment-alt"></i> ${item.observacao}</div>` : '';
 
+                let nomeProduto = item.produto.nome;
+                if (item.tamanho === 'mini' && !nomeProduto.toLowerCase().startsWith('mini ')) {
+                    nomeProduto = 'Mini ' + nomeProduto;
+                }
+
                 const itemHtml = `
                     <div class="cart-item">
                         <div class="d-flex justify-content-between align-items-start mb-1">
                             <div class="d-flex align-items-center">
                                 <span class="me-2">${item.quantidade}x</span>
-                                <span>${item.produto.nome}</span>
+                                <span>${nomeProduto}</span>
                             </div>
                             <div>R$ ${formatMoney(itemTotal)}</div>
                         </div>
@@ -1373,6 +1407,11 @@ console.log('Iniciando busca com termo:', search, 'categoria:', category);
 
             // Log para debug
             console.log('Dados do pedido:', dadosPedido);
+            if (Array.isArray(cart)) {
+                cart.forEach((item, idx) => {
+                    console.log(`[DEBUG] Item ${idx}: produto=${item.produto.nome}, tamanho=${item.tamanho}`);
+                });
+            }
 
             // Enviar pedido
             $.ajax({
@@ -1459,19 +1498,28 @@ console.log('Iniciando busca com termo:', search, 'categoria:', category);
                 return;
             }
 
+            let tamanho = 'normal';
+            let nomeProduto = product.nome;
+            let precoTotal = parseFloat(product.preco_normal);
+            if ((product.categoria && product.categoria.toUpperCase() === 'XIS') && parseFloat(product.preco_mini) > 0) {
+                // No quick add, sempre normal (padrão), mas pode ser adaptado se quiser permitir mini
+                // tamanho = 'normal';
+                // Se quiser permitir mini, pode abrir modal ou perguntar
+            }
+
             const cartItem = {
                 produto: {
                     id: product.id,
-                    nome: product.nome,
-                    preco: parseFloat(product.preco_normal)
+                    nome: nomeProduto,
+                    preco: precoTotal
                 },
                 quantidade: 1,
                 ingredientes: [],
                 observacao: '',
-                valor_total: parseFloat(product.preco_normal)
+                valor_total: precoTotal,
+                tamanho: tamanho
             };
 
-            // Add animation to the clicked button
             const button = event.currentTarget;
             button.classList.add('add-to-cart-animation');
             setTimeout(() => button.classList.remove('add-to-cart-animation'), 500);
@@ -1485,13 +1533,9 @@ console.log('Iniciando busca com termo:', search, 'categoria:', category);
                     if (response.success) {
                         cart = response.carrinho || [];
                         updateCartUI();
-                        
-                        // Add animation to cart count
                         const cartCount = $('#cartCount');
                         cartCount.addClass('cart-count-animation');
                         setTimeout(() => cartCount.removeClass('cart-count-animation'), 500);
-                        
-                        // Show quick confirmation toast
                         const Toast = Swal.mixin({
                             toast: true,
                             position: 'top-end',
@@ -1503,7 +1547,6 @@ console.log('Iniciando busca com termo:', search, 'categoria:', category);
                                 toast.addEventListener('mouseleave', Swal.resumeTimer)
                             }
                         });
-
                         Toast.fire({
                             icon: 'success',
                             title: `${product.nome} adicionado ao pedido`

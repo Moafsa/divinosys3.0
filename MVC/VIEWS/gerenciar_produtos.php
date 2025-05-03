@@ -53,6 +53,7 @@ function escape($str) {
                             <th>Nome</th>
                             <th>Categoria</th>
                             <th>Preço</th>
+                            <th>Preço Mini</th>
                             <th>Estoque</th>
                             <th>Estoque Mín.</th>
                             <th>Custo</th>
@@ -79,6 +80,7 @@ function escape($str) {
                                 <td><?php echo escape($produto['nome']); ?></td>
                                 <td><?php echo escape($produto['categoria_nome']); ?></td>
                                 <td>R$ <?php echo number_format((float)$produto['preco_normal'], 2, ',', '.'); ?></td>
+                                <td><?php echo $produto['preco_mini'] !== null ? 'R$ ' . number_format((float)$produto['preco_mini'], 2, ',', '.') : '-'; ?></td>
                                 <td><?php echo (int)$produto['estoque_atual']; ?></td>
                                 <td><?php echo (int)$produto['estoque_minimo']; ?></td>
                                 <td>R$ <?php echo number_format((float)$produto['preco_custo'], 2, ',', '.'); ?></td>
@@ -145,6 +147,10 @@ function escape($str) {
                             <div class="form-group">
                                 <label>Preço de Venda</label>
                                 <input type="number" step="0.01" class="form-control" name="preco_normal" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Preço Mini</label>
+                                <input type="number" step="0.01" class="form-control" name="preco_mini">
                             </div>
                             <div class="form-group">
                                 <label>Descrição</label>
@@ -216,7 +222,11 @@ function escape($str) {
                             </div>
                             <div class="form-group">
                                 <label>Preço de Venda</label>
-                                <input type="number" step="0.01" class="form-control" name="preco_normal" id="edit_preco" required>
+                                <input type="number" step="0.01" class="form-control" name="preco_normal" id="edit_preco_normal" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Preço Mini</label>
+                                <input type="number" step="0.01" class="form-control" name="preco_mini" id="edit_preco_mini">
                             </div>
                             <div class="form-group">
                                 <label>Descrição</label>
@@ -286,7 +296,8 @@ $(document).ready(function() {
                 $('#edit_id').val(produto.id || '');
                 $('#edit_nome').val(produto.nome || '');
                 $('#edit_categoria').val(produto.categoria_id || '');
-                $('#edit_preco').val(produto.preco_normal || '');
+                $('#edit_preco_normal').val(produto.preco_normal || '');
+                $('#edit_preco_mini').val(produto.preco_mini || '');
                 $('#edit_descricao').val(produto.descricao || '');
                 $('#edit_estoque').val(produto.estoque_atual || '');
                 $('#edit_estoque_minimo').val(produto.estoque_minimo || '');

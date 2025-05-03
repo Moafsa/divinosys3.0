@@ -121,6 +121,7 @@ try {
             'quantidade' => $quantidade,
             'ingredientes' => $ingredientes,
             'observacao' => isset($data['observacao']) ? strip_tags(trim($data['observacao'])) : '',
+            'tamanho' => isset($data['tamanho']) ? strip_tags(trim($data['tamanho'])) : null,
             'data_adicao' => date('Y-m-d H:i:s')
         ];
 
