@@ -115,19 +115,23 @@ $config = require_once __DIR__ . '/../CONFIG/estabelecimento.php';
     <style>
         @page { margin: 0; }
         body {
-            font-family: 'Courier New', monospace;
+            font-family: Arial, Verdana, sans-serif;
             margin: 0;
             padding: 10px;
             width: <?php echo $config['printer']['width'] ?? 80; ?>mm;
-            font-size: 12px;
+            font-size: 17px;
             line-height: 1.2;
         }
         .header, .footer { text-align: center; margin-bottom: 10px; }
         .divider { border-top: 1px dashed #000; margin: 5px 0; }
         .info-block { margin-bottom: 10px; }
         .item { margin-bottom: 5px; }
-        .total { font-weight: bold; text-align: right; margin-top: 10px; }
-        .small-text { font-size: 10px; }
+        .item-main { font-weight: bold; }
+        .produto-nome { font-weight: bold; }
+        .item-detail { font-size: 17px; font-family: 'Times New Roman', Times, serif; }
+        .mesa-detail { font-size: 17px; font-weight: bold; }
+        .total { font-weight: bold; text-align: right; margin-top: 10px; font-size: 21px; }
+        .small-text { font-size: 11px; }
         @media print { body { width: 80mm; margin: 0; padding: 0; } }
     </style>
 </head>
@@ -147,7 +151,7 @@ $config = require_once __DIR__ . '/../CONFIG/estabelecimento.php';
         <strong>CUPOM DELIVERY</strong><br>
         Pedido: #<?php echo str_pad($pedido_id, 6, '0', STR_PAD_LEFT); ?><br>
         Data: <?php echo date('d/m/Y', strtotime($pedido['data'])) . ' ' . $pedido['hora_pedido']; ?><br>
-        <?php if (!empty($pedido['mesa_numero'])): ?>Mesa: <?php echo $pedido['mesa_numero']; ?><br><?php endif; ?>
+        <?php if (!empty($pedido['mesa_numero'])): ?>Mesa: <span class="mesa-detail"><?php echo $pedido['mesa_numero']; ?></span><br><?php endif; ?>
         <strong>Cliente:</strong> <?php echo htmlspecialchars($pedido['cliente_nome'] ?? ''); ?><br>
         <strong>Telefone:</strong> <?php echo htmlspecialchars($pedido['cliente_tel'] ?? ''); ?><br>
         <strong>Endereço:</strong> <?php echo htmlspecialchars($pedido['cliente_endereco'] ?? ''); ?><br>
@@ -172,9 +176,9 @@ $config = require_once __DIR__ . '/../CONFIG/estabelecimento.php';
                 $nomeProduto = 'Mini ' . $nomeProduto;
             }
             ?>
-            <?php echo $item['quantidade']; ?>x <?php echo htmlspecialchars($nomeProduto); ?><br>
+            <span class="item-main"><?php echo $item['quantidade']; ?>x <span class="produto-nome"><?php echo htmlspecialchars($nomeProduto); ?></span></span><br>
             <?php if (!empty($item['ingredientes'])): ?>
-                <span class="small-text">
+                <span class="item-detail">
                 <?php
                 $com = [];
                 $sem = [];
@@ -194,7 +198,7 @@ $config = require_once __DIR__ . '/../CONFIG/estabelecimento.php';
                 ?>
                 </span>
             <?php endif; ?>
-            <span class="small-text">
+            <span class="item-detail">
                 <?php 
                 if (!empty($item['observacao'])) {
                     echo "OBS: " . $item['observacao'] . "<br>";
