@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: db:3306
--- Tempo de geração: 27/04/2025 às 18:32
+-- Host: db
+-- Tempo de geração: 13/05/2025 às 14:50
 -- Versão do servidor: 8.0.42
 -- Versão do PHP: 8.2.27
 
@@ -138,6 +138,36 @@ INSERT INTO `categorias` (`id`, `nome`, `created_at`, `imagem`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estrutura para tabela `categorias_financeiras`
+--
+
+CREATE TABLE `categorias_financeiras` (
+  `id` int NOT NULL,
+  `nome` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tipo` enum('receita','despesa') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descricao` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Despejando dados para a tabela `categorias_financeiras`
+--
+
+INSERT INTO `categorias_financeiras` (`id`, `nome`, `tipo`, `descricao`, `created_at`, `updated_at`) VALUES
+(1, 'Vendas', 'receita', 'Receitas provenientes de vendas', '2025-05-07 21:42:06', '2025-05-07 21:42:06'),
+(2, 'Serviços', 'receita', 'Receitas provenientes de serviços', '2025-05-07 21:42:06', '2025-05-07 21:42:06'),
+(3, 'Aluguel', 'despesa', 'Despesas com aluguel', '2025-05-07 21:42:06', '2025-05-07 21:42:06'),
+(4, 'Salários', 'despesa', 'Despesas com salários', '2025-05-07 21:42:06', '2025-05-07 21:42:06'),
+(5, 'Fornecedores', 'despesa', 'Despesas com fornecedores', '2025-05-07 21:42:06', '2025-05-07 21:42:06'),
+(6, 'Impostos', 'despesa', 'Despesas com impostos', '2025-05-07 21:42:06', '2025-05-07 21:42:06'),
+(7, 'Manutenção', 'despesa', 'Despesas com manutenção', '2025-05-07 21:42:06', '2025-05-07 21:42:06'),
+(8, 'Outros', 'receita', 'Outras receitas', '2025-05-07 21:42:06', '2025-05-07 21:42:06'),
+(9, 'Outros', 'despesa', 'Outras despesas', '2025-05-07 21:42:06', '2025-05-07 21:42:06');
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura para tabela `clientes`
 --
 
@@ -145,23 +175,49 @@ CREATE TABLE `clientes` (
   `id` int NOT NULL,
   `nome` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
   `endereco` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
-  `bairro` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
-  `cidade` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
-  `estado` varchar(50) COLLATE utf8mb3_bin DEFAULT NULL,
-  `complemento` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
-  `cep` varchar(20) COLLATE utf8mb3_bin DEFAULT NULL,
-  `ponto_referencia` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
-  `tel1` varchar(20) COLLATE utf8mb3_bin DEFAULT NULL,
-  `tel2` varchar(20) COLLATE utf8mb3_bin DEFAULT NULL,
-  `email` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
-  `cpf_cnpj` varchar(30) COLLATE utf8mb3_bin DEFAULT NULL,
-  `rg` varchar(30) COLLATE utf8mb3_bin DEFAULT NULL,
-  `condominio` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
-  `bloco` varchar(50) COLLATE utf8mb3_bin DEFAULT NULL,
-  `apartamento` varchar(50) COLLATE utf8mb3_bin DEFAULT NULL,
-  `local_entrega` varchar(100) COLLATE utf8mb3_bin DEFAULT NULL,
-  `observacoes` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL
+  `bairro` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `cidade` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `estado` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `complemento` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `cep` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `ponto_referencia` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `tel1` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `tel2` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `cpf_cnpj` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `rg` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `condominio` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `bloco` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `apartamento` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `local_entrega` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `observacoes` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `contas_financeiras`
+--
+
+CREATE TABLE `contas_financeiras` (
+  `id` int NOT NULL,
+  `nome` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tipo` enum('conta_corrente','poupanca','carteira','outros') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `saldo_inicial` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `saldo_atual` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `banco` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `agencia` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `conta` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Despejando dados para a tabela `contas_financeiras`
+--
+
+INSERT INTO `contas_financeiras` (`id`, `nome`, `tipo`, `saldo_inicial`, `saldo_atual`, `banco`, `agencia`, `conta`, `created_at`, `updated_at`) VALUES
+(1, 'Caixa', 'carteira', 0.00, 599.97, NULL, NULL, NULL, '2025-05-12 19:45:06', '2025-05-13 14:43:05');
 
 -- --------------------------------------------------------
 
@@ -239,7 +295,21 @@ CREATE TABLE `estoque` (
 INSERT INTO `estoque` (`id`, `produto_id`, `estoque_atual`, `estoque_minimo`, `preco_custo`, `marca`, `fornecedor`, `data_compra`, `data_validade`, `unidade`, `observacoes`, `created_at`, `updated_at`) VALUES
 (1, 79, 1.00, 5.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-24 18:15:51', '2025-04-24 18:28:28'),
 (2, 80, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-26 17:09:40', '2025-04-26 17:09:40'),
-(6, 59, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-27 18:02:09', '2025-04-27 18:02:09');
+(6, 59, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-27 18:02:09', '2025-04-27 18:02:09'),
+(7, 55, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-04-27 18:43:16', '2025-04-27 18:43:16'),
+(8, 18, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-05-03 00:42:28', '2025-05-03 00:42:28');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `imagens_movimentacoes`
+--
+
+CREATE TABLE `imagens_movimentacoes` (
+  `id` int NOT NULL,
+  `movimentacao_id` int NOT NULL,
+  `caminho` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -314,7 +384,6 @@ CREATE TABLE `log_pedidos` (
   `data_alteracao` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-
 -- --------------------------------------------------------
 
 --
@@ -334,9 +403,9 @@ CREATE TABLE `mesas` (
 
 INSERT INTO `mesas` (`id`, `id_mesa`, `nome`, `status`) VALUES
 (471, '1', '', '1'),
-(472, '2', '', '2'),
-(473, '3', '', '2'),
-(474, '4', '', '2'),
+(472, '2', '', '1'),
+(473, '3', '', '1'),
+(474, '4', '', '1'),
 (475, '5', '', '1'),
 (491, '6', '', '1'),
 (492, '7', '', '1'),
@@ -358,6 +427,49 @@ INSERT INTO `mesas` (`id`, `id_mesa`, `nome`, `status`) VALUES
 (508, '23', NULL, '1'),
 (509, '24', NULL, '1'),
 (510, '25', NULL, '1');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `movimentacoes_financeiras`
+--
+
+CREATE TABLE `movimentacoes_financeiras` (
+  `id` int NOT NULL,
+  `pedido_id` int DEFAULT NULL,
+  `tipo` enum('receita','despesa') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `categoria_id` int NOT NULL,
+  `conta_id` int NOT NULL,
+  `valor` decimal(10,2) NOT NULL,
+  `data_movimentacao` date NOT NULL,
+  `data_vencimento` date DEFAULT NULL,
+  `descricao` text COLLATE utf8mb4_unicode_ci,
+  `status` enum('pendente','pago','cancelado') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendente',
+  `forma_pagamento` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `comprovante` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `observacoes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `parcelas_financeiras`
+--
+
+CREATE TABLE `parcelas_financeiras` (
+  `id` int NOT NULL,
+  `movimentacao_id` int NOT NULL,
+  `numero_parcela` int NOT NULL,
+  `total_parcelas` int NOT NULL,
+  `valor` decimal(10,2) NOT NULL,
+  `data_vencimento` date NOT NULL,
+  `status` enum('pendente','pago','cancelado') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendente',
+  `data_pagamento` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -389,7 +501,6 @@ CREATE TABLE `pedido` (
   `cliente_id` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-
 -- --------------------------------------------------------
 
 --
@@ -418,7 +529,8 @@ CREATE TABLE `pedido_itens` (
   `valor_total` decimal(10,2) NOT NULL,
   `observacao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `ingredientes_sem` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `ingredientes_com` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
+  `ingredientes_com` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `tamanho` varchar(10) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'normal'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -429,13 +541,13 @@ CREATE TABLE `pedido_itens` (
 
 CREATE TABLE `perfil_estabelecimento` (
   `id` int NOT NULL,
-  `nome_estabelecimento` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `cnpj` varchar(24) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `endereco` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `telefone` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `site` varchar(120) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `mensagem_header` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `logo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nome_estabelecimento` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cnpj` varchar(24) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `endereco` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `telefone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `site` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mensagem_header` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `logo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `criado_em` datetime DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -448,7 +560,7 @@ CREATE TABLE `perfil_estabelecimento` (
 
 CREATE TABLE `produtos` (
   `id` int NOT NULL,
-  `codigo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `codigo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `categoria_id` int NOT NULL,
   `nome` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
@@ -506,7 +618,7 @@ INSERT INTO `produtos` (`id`, `codigo`, `categoria_id`, `nome`, `descricao`, `pr
 (52, '8003', 8, 'H2O 500ML', NULL, 7.00, NULL, '2025-04-17 21:26:19', NULL),
 (53, '8004', 8, 'H2O 1,5L', NULL, 12.00, NULL, '2025-04-17 21:26:19', NULL),
 (54, '8005', 8, 'REFRIGERANTE (LATA)', NULL, 7.00, NULL, '2025-04-17 21:26:19', NULL),
-(55, '8006', 8, 'REFRIGERANTE KS', NULL, 5.00, NULL, '2025-04-17 21:26:19', NULL),
+(55, '8006', 8, 'REFRIGERANTE KS', '', 5.00, NULL, '2025-04-17 21:26:19', NULL),
 (56, '8007', 8, 'REFRIGERANTE 600ML', NULL, 8.00, NULL, '2025-04-17 21:26:19', NULL),
 (57, '8008', 8, 'REFRIGERANTE 1L', NULL, 10.00, NULL, '2025-04-17 21:26:19', NULL),
 (58, '8009', 8, 'REFRIGERANTE 2L', NULL, 17.00, NULL, '2025-04-17 21:26:19', NULL),
@@ -848,9 +960,21 @@ ALTER TABLE `categorias`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Índices de tabela `categorias_financeiras`
+--
+ALTER TABLE `categorias_financeiras`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Índices de tabela `clientes`
 --
 ALTER TABLE `clientes`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Índices de tabela `contas_financeiras`
+--
+ALTER TABLE `contas_financeiras`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -875,6 +999,13 @@ ALTER TABLE `estoque`
   ADD KEY `idx_data_validade` (`data_validade`);
 
 --
+-- Índices de tabela `imagens_movimentacoes`
+--
+ALTER TABLE `imagens_movimentacoes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `movimentacao_id` (`movimentacao_id`);
+
+--
 -- Índices de tabela `ingredientes`
 --
 ALTER TABLE `ingredientes`
@@ -893,6 +1024,22 @@ ALTER TABLE `log_pedidos`
 --
 ALTER TABLE `mesas`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Índices de tabela `movimentacoes_financeiras`
+--
+ALTER TABLE `movimentacoes_financeiras`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `categoria_id` (`categoria_id`),
+  ADD KEY `conta_id` (`conta_id`),
+  ADD KEY `fk_movimentacao_pedido` (`pedido_id`);
+
+--
+-- Índices de tabela `parcelas_financeiras`
+--
+ALTER TABLE `parcelas_financeiras`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `movimentacao_id` (`movimentacao_id`);
 
 --
 -- Índices de tabela `pedido`
@@ -969,10 +1116,22 @@ ALTER TABLE `categorias`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
+-- AUTO_INCREMENT de tabela `categorias_financeiras`
+--
+ALTER TABLE `categorias_financeiras`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
 -- AUTO_INCREMENT de tabela `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de tabela `contas_financeiras`
+--
+ALTER TABLE `contas_financeiras`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de tabela `despesas`
@@ -990,6 +1149,12 @@ ALTER TABLE `entregadores`
 -- AUTO_INCREMENT de tabela `estoque`
 --
 ALTER TABLE `estoque`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT de tabela `imagens_movimentacoes`
+--
+ALTER TABLE `imagens_movimentacoes`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
@@ -1002,7 +1167,7 @@ ALTER TABLE `ingredientes`
 -- AUTO_INCREMENT de tabela `log_pedidos`
 --
 ALTER TABLE `log_pedidos`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT de tabela `mesas`
@@ -1011,22 +1176,34 @@ ALTER TABLE `mesas`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=511;
 
 --
+-- AUTO_INCREMENT de tabela `movimentacoes_financeiras`
+--
+ALTER TABLE `movimentacoes_financeiras`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT de tabela `parcelas_financeiras`
+--
+ALTER TABLE `parcelas_financeiras`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
 -- AUTO_INCREMENT de tabela `pedido`
 --
 ALTER TABLE `pedido`
-  MODIFY `idpedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
+  MODIFY `idpedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
 
 --
 -- AUTO_INCREMENT de tabela `pedido_item_ingredientes`
 --
 ALTER TABLE `pedido_item_ingredientes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT de tabela `pedido_itens`
 --
 ALTER TABLE `pedido_itens`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=129;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=162;
 
 --
 -- AUTO_INCREMENT de tabela `perfil_estabelecimento`
@@ -1063,10 +1240,30 @@ ALTER TABLE `estoque`
   ADD CONSTRAINT `estoque_ibfk_1` FOREIGN KEY (`produto_id`) REFERENCES `produtos` (`id`) ON DELETE CASCADE;
 
 --
+-- Restrições para tabelas `imagens_movimentacoes`
+--
+ALTER TABLE `imagens_movimentacoes`
+  ADD CONSTRAINT `imagens_movimentacoes_ibfk_1` FOREIGN KEY (`movimentacao_id`) REFERENCES `movimentacoes_financeiras` (`id`) ON DELETE CASCADE;
+
+--
 -- Restrições para tabelas `log_pedidos`
 --
 ALTER TABLE `log_pedidos`
   ADD CONSTRAINT `log_pedidos_ibfk_1` FOREIGN KEY (`idpedido`) REFERENCES `pedido` (`idpedido`);
+
+--
+-- Restrições para tabelas `movimentacoes_financeiras`
+--
+ALTER TABLE `movimentacoes_financeiras`
+  ADD CONSTRAINT `fk_movimentacao_categoria` FOREIGN KEY (`categoria_id`) REFERENCES `categorias_financeiras` (`id`),
+  ADD CONSTRAINT `fk_movimentacao_conta` FOREIGN KEY (`conta_id`) REFERENCES `contas_financeiras` (`id`),
+  ADD CONSTRAINT `fk_movimentacao_pedido` FOREIGN KEY (`pedido_id`) REFERENCES `pedido` (`idpedido`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Restrições para tabelas `parcelas_financeiras`
+--
+ALTER TABLE `parcelas_financeiras`
+  ADD CONSTRAINT `fk_parcela_movimentacao` FOREIGN KEY (`movimentacao_id`) REFERENCES `movimentacoes_financeiras` (`id`);
 
 --
 -- Restrições para tabelas `pedido`
