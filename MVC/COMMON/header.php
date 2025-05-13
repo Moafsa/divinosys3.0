@@ -153,6 +153,7 @@ $usuario = isset($_SESSION['nome']) ? $_SESSION['nome'] : (isset($_SESSION['user
             <a class="collapse-item" href="<?php echo url('?view=estoque'); ?>" style=" border-radius: 8px; font-size:18px;">Estoque</a>
             <a class="collapse-item" href="index.php?view=gerenciar_categorias" style=" border-radius: 8px; font-size:18px;">Categorias</a>
             <a class="collapse-item" href="index.php?view=relatorios" style=" border-radius: 8px; font-size:18px;">Relatórios</a>
+            <a class="collapse-item" href="index.php?view=financeiro" style=" border-radius: 8px; font-size:18px;">Financeiro</a>
           </div>
         </div>
       </li>

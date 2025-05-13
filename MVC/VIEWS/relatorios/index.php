@@ -85,7 +85,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
             <div class="card card-dashboard bg-success text-white">
                 <div class="card-body">
                     <h6 class="card-title">Total Amount</h6>
-                    <h2 class="mb-0">R$ <?php echo number_format($summary['total_amount'], 2, '.', ','); ?></h2>
+                    <h2 class="mb-0">R$ <?php echo number_format((float)($summary['total_amount'] ?? 0), 2, '.', ','); ?></h2>
                 </div>
             </div>
         </div>
@@ -135,7 +135,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
                                 <tr>
                                     <td><?php echo $product['name']; ?></td>
                                     <td><?php echo $product['total_quantity']; ?></td>
-                                    <td>R$ <?php echo number_format($product['total_amount'], 2, '.', ','); ?></td>
+                                    <td>R$ <?php echo number_format((float)($product['total_amount'] ?? 0), 2, '.', ','); ?></td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -215,7 +215,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
                                 </span>
                             </td>
                             <td><?php echo $order['delivery'] ? 'Delivery' : 'Table'; ?></td>
-                            <td>R$ <?php echo number_format($order['total_amount'], 2, '.', ','); ?></td>
+                            <td>R$ <?php echo number_format((float)($order['total_amount'] ?? 0), 2, '.', ','); ?></td>
                             <td><?php echo $order['attendant']; ?></td>
                         </tr>
                         <?php endforeach; ?>
@@ -243,7 +243,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
                 <div class="mb-3 p-2 border rounded bg-light">
                     <div class="d-flex justify-content-between align-items-center">
                         <strong>Mesa <?php echo htmlspecialchars($mesa); ?></strong>
-                        <span class="fw-bold">Total: R$ <?php echo number_format(array_sum(array_column($pedidos, 'total_amount')), 2, ',', '.'); ?></span>
+                        <span class="fw-bold">Total: R$ <?php echo number_format((float)array_sum(array_map(function($p){return $p['total_amount'] ?? 0;}, $pedidos)), 2, ',', '.'); ?></span>
                     </div>
                     <div class="table-responsive mt-2">
                         <table class="table table-sm table-bordered mb-0">
@@ -267,7 +267,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
                                     ?>"><?php echo $pedido['status']; ?></span></td>
                                     <td><?php echo date('d/m/Y', strtotime($pedido['date'])); ?></td>
                                     <td><?php echo $pedido['order_time']; ?></td>
-                                    <td>R$ <?php echo number_format($pedido['total_amount'], 2, ',', '.'); ?></td>
+                                    <td>R$ <?php echo number_format((float)($pedido['total_amount'] ?? 0), 2, ',', '.'); ?></td>
                                     <td>
                                         <button class="btn btn-sm btn-info" onclick="verPedido(<?php echo $pedido['order_id']; ?>)"><i class="fas fa-eye"></i> Ver Pedido</button>
                                     </td>
@@ -279,7 +279,7 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
                 </div>
             <?php endforeach; ?>
             <div class="mt-3 text-end">
-                <strong>Total Geral: R$ <?php echo number_format($total_geral, 2, ',', '.'); ?></strong>
+                <strong>Total Geral: R$ <?php echo number_format((float)$total_geral, 2, ',', '.'); ?></strong>
             </div>
         </div>
     </div>

@@ -66,6 +66,10 @@ switch ($view) {
         include_once(__DIR__ . "/configuracao.php");
         break;
         
+    case 'financeiro':
+        include_once(__DIR__ . "/financeiro/index.php");
+        break;
+        
     default:
         include_once(__DIR__ . "/404.php");
         break;

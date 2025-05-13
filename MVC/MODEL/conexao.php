@@ -42,14 +42,15 @@ error_log("Servidor: " . $servidor);
 error_log("Banco: " . $dbname);
 
 // Database connection
-$conn = mysqli_connect($servidor, $usuario, $senha, $dbname);
+global $conn;
+$conn = new mysqli($servidor, $usuario, $senha, $dbname);
 
 // If connection fails, display error message
-if (!$conn) {
+if ($conn->connect_error) {
     echo "<div style='color: red; font-weight: bold; text-align: center; margin-top: 20px;'>";
     echo "Connection Error: Could not connect to database.";
     echo "</div>";
-    error_log("Main connection failure: " . mysqli_connect_error());
+    error_log("Main connection failure: " . $conn->connect_error);
     // Don't kill execution to allow page to load with appropriate message
 } else {
     // Set charset to UTF-8
